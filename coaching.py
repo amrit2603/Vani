@@ -12,7 +12,8 @@ import httpx
 LOCK = threading.Lock()
 CALLS = deque()
 ACTIONS = {
-    "coach": "Give two specific practice suggestions with quoted evidence. Discuss structure and relevance, not pronunciation, confidence, health, or a numerical ability score.",
+    "prompt": "Turn the supplied rough idea into a clear reusable AI prompt with Goal, Context, Requirements and Output format. Preserve facts. Use placeholders for missing details; invent none.",
+    "coach": "Use headings: What you said; What worked; What to improve; Next attempt. Summarize the argument, assess topic relevance and structure, and give two actionable improvements with short quotes as evidence. Flag possible wording issues cautiously because ASR can introduce errors. Do not invent mistakes or assess pronunciation, confidence, health, or a numerical ability score.",
     "clean": "Remove repetitions and fix punctuation without changing meaning or adding facts.",
     "message": "Write a concise message using only supplied facts.",
     "update": "Organize as Completed, Pending, Next. Mark missing information as not mentioned.",

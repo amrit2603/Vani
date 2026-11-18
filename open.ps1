@@ -36,4 +36,4 @@ if (-not (Test-Vani)) {
     if (-not $ready) { throw "Vani is not responding yet. See .cache\server-$Port.err.log, then try again." }
 }
 Write-Host "Vani is ready: $url"
-if (-not $NoBrowser) { Start-Process -FilePath "$url/#dictate" }
+if (-not $NoBrowser) { Start-Process -FilePath "$url/#practice" }

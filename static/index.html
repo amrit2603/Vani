@@ -31,7 +31,7 @@
         <span class="workspace-brand" hidden>Vani</span>
       </a>
       <nav aria-label="Main navigation">
-        <a href="#dictate">Workspace</a><a href="#practice">Practice</a>
+        <a href="#practice">Practice</a><a href="#dictate">Workspace</a>
       </nav>
     </header>
 
@@ -156,6 +156,16 @@
                 Cancel
               </button>
             </div>
+            <label class="live-option"
+              ><input id="live-enabled" type="checkbox" /> Live draft (browser
+              service)</label
+            >
+            <p class="recording-note">
+              Optional: audio may go to your browser’s speech provider. Final
+              text comes from Qwen after Stop.
+            </p>
+            <p id="live-status" role="status"></p>
+            <p id="live-draft" aria-label="Live draft"></p>
             <div class="record-meta">
               <span id="record-state">Ready when you are.</span
               ><output id="timer" aria-label="Recording duration">00:00</output>
@@ -209,12 +219,44 @@
           Nothing is recording yet. Your microphone turns on only when you ask.
         </div>
         <section
+          id="writing-tools"
+          class="writing-tools"
+          aria-label="Use your text"
+        >
+          <h2>Put your words to work.</h2>
+          <button id="make-prompt" class="button primary">
+            Turn into a prompt
+          </button>
+          <button id="clean-text" class="button">Clean up text</button>
+          <p class="recording-note">
+            On click, sends your text to Gemini. Your original stays unchanged.
+          </p>
+          <p id="writing-status" role="status"></p>
+          <textarea
+            id="writing-output"
+            aria-label="AI writing suggestion"
+            readonly
+            hidden
+          ></textarea>
+          <button id="copy-writing" class="button" hidden>Copy result</button>
+        </section>
+        <section
           id="practice-result"
           class="practice-result"
           hidden
           aria-labelledby="feedback-title"
         >
           <h2 id="feedback-title">Your feedback</h2>
+          <div class="score-summary">
+            <output id="delivery-score">—</output
+            ><span id="score-label">Delivery score / 100</span>
+          </div>
+          <p id="score-explanation"></p>
+          <p id="score-change"></p>
+          <ul
+            id="practice-observations"
+            aria-label="Observations and next steps"
+          ></ul>
           <p id="practice-report"></p>
           <p id="practice-tip"></p>
           <p id="comparison"></p>

@@ -49,3 +49,7 @@ Existing NILE transcription implementation and documented CPU observations. Fres
 ## Simplicity requirement
 
 Workspace and Practice are centered main navigation choices. No onboarding, personalization, batch upload, history or advanced editing panels. Topics/passages appear only after New topic / New passage is clicked. Selected 2/3/5-minute sessions use a countdown and auto-stop. Show the transcript, audio playback/download and a short result after recording, with same-topic retry and explicitly requested AI coaching. Preserve the original visual language and animation. Existing browser history data is left untouched, with no automatic persistent recording storage. Local users open the app through Open Vani.cmd after setup.
+
+## Latest approved extension
+
+Practice is first in navigation and launcher. Optional opt-in browser-service live drafts supplement final Qwen transcription, with support/privacy/fallback notices. Transparent experimental delivery score and same-session retry comparison are separate from semantic AI coaching. Workspace exposes prompt creation and cleanup as explicit Gemini actions, leaving source text intact. Native Qwen streaming, pronunciation grading and daily progress storage are not implemented.

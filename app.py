@@ -105,7 +105,7 @@ def transcribe(audio: UploadFile, language: Annotated[Literal["auto", "en", "hi"
 
 class Assistance(BaseModel):
     text: str = Field(min_length=1, max_length=12000)
-    action: Literal["coach", "clean", "message", "update", "notes", "translate"]
+    action: Literal["coach", "clean", "message", "update", "notes", "translate", "prompt"]
     context: str = Field(default="", max_length=3000)
     language: Literal["English", "Hindi"] = "English"
     consent: Literal[True]

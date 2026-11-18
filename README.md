@@ -6,7 +6,7 @@ Standalone local Hindi, English, and Hinglish dictation powered by Qwen3-ASR. MI
 
 **Two simple rooms:** Workspace for dictation, editing and copying. Practice for Speak on a Topic / Read Aloud with 2/3/5-minute sessions, New topic / New passage, a countdown with automatic stop, visible transcript, recording playback/download, concise feedback, same-topic retry and optional Gemini coaching. No setup wizard, batch uploads or advanced tool panels. See [scope, setup and limitations](docs/practice-release.md). The original appearance and animated landing are retained.
 
-**Open on this computer:** double-click **Open Vani.cmd** in D:\Vani. It starts the local server if needed, waits for it to respond, and opens Workspace in your default browser. Keep microphone permission enabled. Do not open static/index.html directly. Startup errors appear in the command window; server logs are in .cache.
+**Open on this computer:** double-click **Open Vani.cmd** in D:\Vani. It starts the local server if needed, waits for it to respond, and opens Practice in your default browser. Keep microphone permission enabled. Do not open static/index.html directly. Startup errors appear in the command window; server logs are in .cache.
 
 The local address is <http://127.0.0.1:8787/#dictate>. Browser-flow checks cover recording, cancellation, clipboard, retries, audio playback/download and mobile layout; actual ASR checks are recorded separately. The intended public site is **vani.amritkumar.dev**, with a separate **shubhamsingh123/vani-speech** ZeroGPU service. These are deployment targets, not claimed live URLs. Follow [the verified free deployment plan](docs/free-deployment.md).
 
@@ -63,3 +63,13 @@ See [verification and limitations](docs/playbook-hardening.md), [deployment note
 ## Source repository
 
 Published source: [amrit2603/Vani](https://github.com/amrit2603/Vani). This project is separate from NILE. Recordings, model weights, caches, virtual environments and secrets stay out of Git. The supplied penguin animation is an intentional application asset with separate provenance, not a user voice recording. Public source publication does not mean the hosted website or inference service has been deployed.
+
+## Live drafts, scores and writing tools
+
+Practice comes first in navigation and the local launcher. Optional Live draft uses the browser SpeechRecognition service with provisional results; this is not Qwen token streaming. Browser support, network access and mixed-language recognition vary. Audio may go to the browser provider only when this option is selected and recording begins. Failure leaves recording/final Qwen transcription available. No latency or word-by-word delivery guarantee. See [MDN SpeechRecognition](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition).
+
+The large Delivery score is an experimental, transparent 100-point rubric: session completion 40, recognized pace 30 (100–180 words/min target), and proportion outside amplitude-based quiet intervals 30. At least ten seconds and ten recognized words are required. It does not measure relevance, grammar, pronunciation or communication ability. The same-topic, mode and duration retry compares percentage points and relative change; it is not a daily progress tracker or validated assessment. Quiet backgrounds and ASR errors can affect results.
+
+Request optional AI coaching for a summary, strengths, transcript-supported possible issues and next steps. Workspace adds Turn into a prompt and Clean up text, each sending text to Gemini only when clicked. Results stay separate, editable by copying, and originals remain untouched. Existing request limits apply; no paid-plan changes or automatic AI calls.
+
+New checks: node tests/score.mjs and node tests/features.cjs (mocked browser recognition and AI; synthetic metric inputs). No new real Gemini call or successful live-provider microphone session is claimed.

@@ -12,3 +12,5 @@ Authority: the user's 1440 × 662, 12.28-second preview video, sampled at one-se
 - Reduced-motion preference pauses the video; the pause/play control remains available.
 
 - Simplified rooms: centered Workspace / Practice tabs lead the task path. Workspace presents recording beside one editable transcript; Practice presents mode, duration, New topic / New passage, countdown, recording, visible transcript and concise feedback. Playback and Save recording sit together below recording controls; AI coaching is secondary. No personalization or productivity dashboard.
+
+- Practice-first centered navigation. Large monochrome delivery score with visible formula, observed next steps and comparable-attempt change. Live provisional text is distinct from the final editor; writing suggestions stay separate from source. Both nav choices remain visible on mobile.

@@ -591,3 +591,5 @@ reducedMotion.addEventListener("change", (event) => motion(event.matches));
 route();
 updateEditor();
 import("./studio.js");
+import("./writing.js");
+import("./live.js");

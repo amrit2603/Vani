@@ -16,6 +16,12 @@ class CoachingTests(unittest.TestCase):
             self.assertEqual(response.status_code, 422)
             call.assert_not_called()
 
+    def test_prompt_action_reaches_helper(self):
+        with patch('app.assist', return_value={'text': 'Goal: study'}) as call:
+            response = TestClient(app, base_url='http://localhost').post('/api/assist', json={'text':'study','action':'prompt','consent':True})
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(call.call_args.args[1], 'prompt')
+
     def test_key_file_is_not_a_public_asset(self):
         client = TestClient(app, base_url='http://localhost')
         self.assertEqual(client.get('/.env').status_code, 404)

@@ -1,4 +1,4 @@
-import { agreement, measurements } from "./speech-tools.mjs";
+import { agreement, measurements, deliveryScore } from "./speech-tools.mjs";
 const $ = (id) => document.getElementById(id);
 const topics = {
   Everyday: [
@@ -141,7 +141,56 @@ document.addEventListener("vani:result", (event) => {
   const reference = $("prompt").textContent;
   const reading = $("practice-mode").value === "read";
   const score = reading ? agreement(reference, result.text) : null;
-  attempt = { text: result.text, prompt: reference, metrics, reading };
+  const target = Number($("duration").value);
+  const delivery = deliveryScore(metrics, target);
+  const observations = [];
+  if (metrics.seconds < target * 0.8)
+    observations.push(
+      `You recorded ${metrics.seconds}s of a ${target}s session. Next time, develop your point with a concrete example before concluding.`,
+    );
+  if (metrics.seconds >= 10 && metrics.wpm < 100)
+    observations.push(
+      `Recognized pace: ${metrics.wpm} words/min, below this rubric's range. Listen back for long gaps; slower speech is not automatically poor communication.`,
+    );
+  if (metrics.seconds >= 10 && metrics.wpm > 180)
+    observations.push(
+      `Recognized pace: ${metrics.wpm} words/min, above this rubric's range. Try short pauses between ideas so listeners can follow.`,
+    );
+  if (metrics.longest_quiet > 3)
+    observations.push(
+      `Longest quiet interval: ${metrics.longest_quiet}s. Listen back and rehearse that transition; background noise can affect this estimate.`,
+    );
+  observations.push(
+    "For topic relevance, structure and possible wording issues, request AI coaching below. Audio metrics alone cannot judge these.",
+  );
+  $("practice-observations").replaceChildren(
+    ...observations.map((text) => {
+      const item = document.createElement("li");
+      item.textContent = text;
+      return item;
+    }),
+  );
+  attempt = {
+    text: result.text,
+    prompt: reference,
+    metrics,
+    reading,
+    target,
+    delivery,
+  };
+  $("delivery-score").textContent = delivery ? delivery.total : "—";
+  $("score-explanation").textContent = delivery
+    ? `Session completion ${delivery.completion}/40 · Pace ${delivery.pace}/30 · Continuity ${delivery.continuity}/30. Completion = recording time / selected session; pace targets 100–180 recognized words/min; continuity = time outside quiet intervals. Experimental delivery rubric, not language ability or topic accuracy.`
+    : "Record at least 10 seconds and 10 recognized words for a delivery score. No reliable score yet.";
+  const comparable =
+    previous?.delivery &&
+    delivery &&
+    previous.prompt === reference &&
+    previous.target === target &&
+    previous.reading === reading;
+  $("score-change").textContent = comparable
+    ? `Previous ${previous.delivery.total}/100 → Now ${delivery.total}/100. ${delivery.total - previous.delivery.total >= 0 ? "+" : ""}${delivery.total - previous.delivery.total} percentage points${previous.delivery.total ? ` (${Math.round(((delivery.total - previous.delivery.total) / previous.delivery.total) * 100)}% relative change)` : ""}. Same topic, mode and duration only; not a daily progress claim.`
+    : "Try this topic again with the same duration to compare attempts. No improvement percentage without a comparable scored attempt.";
   const pace =
     metrics.seconds >= 10
       ? `About ${metrics.wpm} words/min`

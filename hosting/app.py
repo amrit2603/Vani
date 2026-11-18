@@ -67,7 +67,7 @@ with gr.Blocks(title="Vani Speech", delete_cache=(60, 300)) as demo:
     button.click(transcribe, [audio_input, language_input], output, api_name="transcribe", concurrency_limit=1)
     with gr.Accordion("Optional Gemini assistance", open=False):
         ai_text = gr.Textbox(label="Transcript", max_lines=15)
-        ai_action = gr.Dropdown(["coach", "clean", "message", "update", "notes", "translate"], value="coach", label="Action")
+        ai_action = gr.Dropdown(["coach", "clean", "message", "update", "notes", "translate", "prompt"], value="coach", label="Action")
         ai_context = gr.Textbox(label="Practice prompt")
         ai_language = gr.Dropdown(["English", "Hindi"], value="English", label="Output language")
         ai_consent = gr.Checkbox(label="Send this text and prompt to Gemini", value=False)

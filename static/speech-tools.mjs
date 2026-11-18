@@ -6,6 +6,24 @@ export function words(text) {
       .match(/[\p{L}\p{M}\p{N}]+/gu) || []
   );
 }
+export function deliveryScore(metrics, target) {
+  if (metrics.seconds < 10 || metrics.words < 10) return null;
+  const completion = Math.round(40 * Math.min(1, metrics.seconds / target));
+  const pace = Math.round(
+    30 *
+      Math.max(0, 1 - Math.max(100 - metrics.wpm, metrics.wpm - 180, 0) / 100),
+  );
+  const quietSeconds = metrics.quiet.reduce((sum, [a, b]) => sum + b - a, 0);
+  const continuity = Math.round(
+    30 * Math.max(0, 1 - quietSeconds / metrics.seconds),
+  );
+  return {
+    total: completion + pace + continuity,
+    completion,
+    pace,
+    continuity,
+  };
+}
 export function agreement(reference, text) {
   const a = words(reference).slice(0, 1500),
     b = words(text).slice(0, 4000);
