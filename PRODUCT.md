@@ -61,3 +61,7 @@ Preserve landing design. Use a sliding black active tab and a dismissible/expand
 ## Latest requested layout and identity
 
 Workspace first, Practice second. Language/recording/transcript precede prompt and cleanup tools. Keep Practice behavior unchanged. Front and back of the feature card show the same features and an explicit click-to-flip instruction in inverse black/white themes. Only X dismisses; Warning / Info reopens. Include the card below the landing hero. User explicitly selected the Om mark from the supplied name reference for Vani branding, replacing the round face/penguin card identity. Preserve reference pale-blue palette. Smooth the penguin loop and make real playback state obvious.
+
+## Latest card placement correction
+
+No feature card on the initial landing page. Keep Warning / Info below Play/Pause; it leads into Workspace and shows the card. On entering either Workspace or Practice, slide the card from the right into a fixed top-right overlay, including on mobile. Do not move, shrink or push down the workspace. X dismisses the current room card, Warning / Info reopens it, and entering the other room shows its card again.

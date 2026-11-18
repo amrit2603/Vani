@@ -14,7 +14,7 @@ const assert = require("node:assert/strict");
     );
     assert.equal(await p.locator(".brand .om-mark").textContent(), "ॐ");
     assert.equal(await p.locator("nav a").first().textContent(), "Workspace");
-    assert.equal(await p.locator("#feature-card").isVisible(), true);
+    assert.equal(await p.locator("#feature-card").isVisible(), false);
     await p.locator("#motion-toggle").click();
     await p.waitForFunction(
       () =>
@@ -84,7 +84,7 @@ const assert = require("node:assert/strict");
       "0s",
     );
     console.log(
-      "Om branding, workspace-first, home feature card, actual play/pause state, mobile and reduced-motion passed.",
+      "Om branding, workspace-first, landing card hidden, actual play/pause state, mobile and reduced-motion passed.",
     );
   } finally {
     await b.close();

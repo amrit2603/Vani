@@ -14,26 +14,29 @@ function position() {
     indicator.style.transform = `translateX(${active.offsetLeft}px)`;
   }
 }
+let pageName = null,
+  revision = 0;
 function render(page) {
+  revision++;
+  if (page !== pageName) dismissed = false;
+  pageName = page;
   position();
-  const available = ["home", "dictate", "practice"].includes(page);
+  const room = ["dictate", "practice"].includes(page);
   document.body.classList.toggle("is-home", page === "home");
-  if (page === "home") $("home-view").after(card);
-  else $("main").before(card);
-  card.hidden = !available || dismissed;
-  document.body.classList.toggle(
-    "has-feature-card",
-    available && !dismissed && page !== "home",
-  );
-  $("card-open").hidden = !available || !dismissed;
+  document.body.classList.remove("has-feature-card");
+  $("main").before(card);
+  if (page === "home") $("home-view").append($("card-open"));
+  else card.after($("card-open"));
+  card.hidden = !room || dismissed;
+  $("card-open").hidden = page !== "home" && (!room || !dismissed);
   $("card-open").setAttribute("aria-expanded", String(!card.hidden));
   if (!card.hidden && !matchMedia("(prefers-reduced-motion: reduce)").matches)
     card.animate(
       [
-        { opacity: 0, transform: "translateY(12px)" },
-        { opacity: 1, transform: "translateY(0)" },
+        { opacity: 0, transform: "translateX(calc(100% + 24px))" },
+        { opacity: 1, transform: "translateX(0)" },
       ],
-      { duration: 280, easing: "ease-out" },
+      { duration: 320, easing: "cubic-bezier(.2,.8,.2,1)" },
     );
 }
 document.addEventListener("vani:route", (event) => render(event.detail));
@@ -51,19 +54,28 @@ $("card-flip").onclick = () => {
 };
 $("card-close").onclick = async () => {
   dismissed = true;
+  const version = revision;
   const animation = matchMedia("(prefers-reduced-motion: reduce)").matches
     ? null
     : card.animate(
-        [{ opacity: 1 }, { opacity: 0, transform: "translateY(12px)" }],
-        { duration: 160 },
+        [
+          { opacity: 1, transform: "translateX(0)" },
+          { opacity: 0, transform: "translateX(calc(100% + 24px))" },
+        ],
+        { duration: 180, easing: "ease-in" },
       );
   await animation?.finished;
-  render(location.hash.slice(1) || "home");
+  if (version !== revision) return;
+  render(pageName);
   $("card-open").focus();
 };
 $("card-open").onclick = () => {
+  if (pageName === "home") {
+    location.hash = "dictate";
+    return;
+  }
   dismissed = false;
-  render(location.hash.slice(1) || "home");
+  render(pageName);
   $("card-flip").focus();
 };
 card.querySelector(".card-back").setAttribute("aria-hidden", "true");

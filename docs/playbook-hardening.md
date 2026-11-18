@@ -110,3 +110,9 @@ The penguin's 12.28-second clip was converted into a forward/reverse loop at its
 The two-tab reduced-motion regression uncovered a real startup issue: uvicorn logged repeated Exceeded concurrency limit warnings, and the second tab had default HTML controls, no loaded video and no running UI scripts. Local HTTP admission was 8, insufficient for parallel static assets/media in multiple tabs. Both launch scripts now use a bounded 32 HTTP connections; Qwen's one-inference admission and localhost binding remain unchanged. After restarting the verified idle local server, the same two-tab playback/reduced-motion check passed. This is a static-loading fix, not a user-capacity/SLO claim.
 
 Brand/media UI, matching-face/X/reopen/mobile checks, separate-draft Practice checks, recording/copy baseline, timer checks, launcher and 27 Python tests pass. No new real AI request or language-accuracy test was performed for this visual/media change.
+
+## Top-right overlay placement
+
+Landing no longer displays a card. Warning / Info remains below Play/Pause and opens Workspace. Workspace and Practice entry slides the card from the right to a fixed top-right position (90px from top, 16px from right), including mobile. It overlays the page without changing content bounds. X dismisses the current room card; help restores it; changing rooms reveals the card again. Reduced-motion skips sliding. A revision check prevents a stale close animation from hiding a newly entered room's card.
+
+The overlay test confirms hidden landing card, preserved help placement, room entry, exact desktop/mobile positioning, no horizontal overflow and identical workspace bounds before/after dismissal. Card flip/X/reopen, branding/playback/reduced-motion and recording/copy baseline checks pass. Existing recording tests now explicitly dismiss the intentional overlay before working with controls beneath it. No backend, inference or microphone change; no new real ASR/AI request was needed.

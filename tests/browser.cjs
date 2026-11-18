@@ -30,6 +30,8 @@ const path = require('node:path');
   assert.match(await page.title(), /Vani/);
   assert.match(await page.locator('#hero-title').textContent(), /वाणी.*VANI/);
   await page.getByRole('link', { name: 'Start dictating' }).click();
+  await page.locator('#card-close').click();
+  await page.locator('#feature-card').waitFor({state:'hidden'});
   await page.getByRole('button', { name: 'Start recording' }).click();
   await page.getByRole('button', { name: 'Stop & transcribe' }).waitFor();
   await page.waitForTimeout(700);
