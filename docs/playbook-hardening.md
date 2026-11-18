@@ -4,6 +4,8 @@
 
 ## Current frontend and hosted-runtime evidence
 
+- GitHub publication, 18 November 2026: created the public repository https://github.com/amrit2603/Vani and pushed the current app on main. Initial application commit: c8ebfeef898490972103706c788188795fa17778, verified against the remote branch. Before publication, 21 tests, lint and JavaScript syntax checks passed. A limited known-pattern scan of 53 source/asset paths found no matching private keys or common token formats; this is not an exhaustive secret audit. Original references, user recordings, environments and credentials were excluded. Only the intentional cropped application animation is excepted from the MP4 ignore rule.
+
 - Landing and recording/editor pages follow the supplied video. Bilingual name and "Your voice, in words." replace unrelated reference copy. Record/upload, stop, edit, copy, cancellation, retry, playback and reduced-motion controls are implemented.
 - **21 unit tests pass**, including static serving, release-file boundaries and publisher account/overwrite guards. Lint and JavaScript syntax checks pass.
 - Browser QA in installed Edge passed eight flows: synthetic microphone recording/stopping, copying to the clipboard, cancellation without upload, failure preserving text, retry appending, clear, navigation stopping the microphone, and mobile overflow. Evidence: browser-check.json. ASR replies in these flow tests are mocked; real ASR is checked separately.

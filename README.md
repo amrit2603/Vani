@@ -50,8 +50,8 @@ uv tool run --from ruff ruff check .
 uv tool run --from pip-audit pip-audit --path .venv/Lib/site-packages
 ```
 
-See [verification and limitations](docs/playbook-hardening.md), [deployment notes](docs/deployment.md), and [third-party notices](THIRD_PARTY_NOTICES.md). Known upstream ML dependency advisories mean this is **not approved for public exposure**.
+See [verification and limitations](docs/playbook-hardening.md), [deployment notes](docs/deployment.md), and [third-party notices](THIRD_PARTY_NOTICES.md). Known upstream ML dependency advisories remain in the **local compatibility runtime**; do not expose that API publicly. The separate native hosting runtime has its own audit and deployment checks.
 
-## GitHub preparation
+## Source repository
 
-This folder is separate from NILE. Review the ignore rules before adding files: recordings, model weights, caches, environments, and secrets must stay out of Git. Once ready, create your own empty GitHub repository and add its URL as the remote. No remote, push, or commit identity is guessed on your behalf.
+Published source: [amrit2603/Vani](https://github.com/amrit2603/Vani). This project is separate from NILE. Recordings, model weights, caches, virtual environments and secrets stay out of Git. The supplied penguin animation is an intentional application asset with separate provenance, not a user voice recording. Public source publication does not mean the hosted website or inference service has been deployed.
