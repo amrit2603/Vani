@@ -23,7 +23,6 @@ if DEVICE == "cpu":
     torch.set_num_threads(min(4, os.cpu_count() or 1))
 
 
-@spaces.GPU(duration=60)
 def transcribe(audio, language):
     if language not in {"auto", "en", "hi", "hi-en"}:
         raise gr.Error("Choose Hindi, English, or automatic detection.")
@@ -37,6 +36,16 @@ def transcribe(audio, language):
         samples = decode_audio(data)
     except Exception:
         raise gr.Error("Choose valid audio under 10 MB and two minutes, with audible speech.") from None
+    return gpu_transcribe(samples, language)
+
+
+def gpu_duration(samples, language):
+    # Initial bounded estimate; calibrate against real hosted inference timings.
+    return min(60, max(20, 10 + int(len(samples) / SAMPLE_RATE / 2)))
+
+
+@spaces.GPU(duration=gpu_duration)
+def gpu_transcribe(samples, language):
     started = perf_counter()
     try:
         inputs = processor.apply_transcription_request(
