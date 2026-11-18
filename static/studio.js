@@ -1,12 +1,5 @@
-import { transcribeFile as transcribeAudio } from "./app.js";
-import {
-  agreement,
-  measurements,
-  captions,
-  referenceDiff,
-} from "./speech-tools.mjs";
-const $ = (id) => document.getElementById(id),
-  editor = $("transcript");
+import { agreement, measurements } from "./speech-tools.mjs";
+const $ = (id) => document.getElementById(id);
 const topics = {
   Everyday: [
     "Describe a habit that made your day better. Explain why it helped and give one example.",
@@ -34,376 +27,218 @@ const passages = [
   "A good project starts with a problem that someone actually faces. Before writing code, we can ask how that person solves the problem today. A small working solution gives us something to test. Feedback may show that a simple feature matters more than an impressive extra. Listening, testing, and improving are part of building software.",
   "हर नया कौशल अभ्यास से बेहतर होता है। छोटे प्रयास हमें अपनी बात को स्पष्ट करने का अवसर देते हैं। किसी विचार को समझाते समय एक उपयोगी उदाहरण सुनने वाले की मदद कर सकता है। अपनी बात समाप्त करते समय मुख्य विचार को दोहराना उपयोगी होता है। हमारा उद्देश्य अपनी आवाज़ में स्पष्ट और सहज संवाद करना है।",
 ];
-let segments = [],
-  marks = [],
-  lastMetrics = null,
+
+let busy = false,
+  attempt = null,
   previous = null,
-  undo = [],
-  busy = false,
-  lastPrompt = "",
-  lastMode = "topic";
-const tell = (text) => ($("status").textContent = text);
-const update = () => editor.dispatchEvent(new Event("input"));
-function edit(fn) {
-  if (busy) return tell("Wait for transcription before editing.");
-  undo.push(editor.value);
-  if (undo.length > 20) undo.shift();
-  editor.value = fn(editor.value);
-  update();
+  revision = 0,
+  feedbackAbort = null;
+function practice() {
+  return location.hash === "#practice";
 }
-function prompt() {
+function stopFeedback() {
+  revision++;
+  if (feedbackAbort) {
+    $("ai-run").disabled = false;
+    $("ai-status").textContent = "";
+  }
+  feedbackAbort?.abort();
+  feedbackAbort = null;
+}
+function resetResult() {
+  stopFeedback();
+  attempt = null;
+  $("practice-result").hidden = true;
+  $("ai-output").textContent = "";
+  $("ai-status").textContent = "";
+  $("ai-run").disabled = false;
+  document.body.classList.remove("show-transcript");
+  $("review-transcript").setAttribute("aria-expanded", "false");
+  $("review-transcript").textContent = "Review transcript";
+}
+function updateRecord() {
+  if (!busy && practice())
+    $("record").disabled = !$("prompt").textContent.trim();
+}
+function clearPrompt() {
+  if (busy) return;
+  $("prompt").textContent = "";
+  $("prompt").hidden = true;
+  $("prompt-placeholder").hidden = false;
+  previous = null;
+  resetResult();
+  updateRecord();
+}
+function newPrompt() {
+  if (busy) return;
+  const language = $("language").value;
   const list =
     $("practice-mode").value === "read"
-      ? passages.filter((text) =>
-          $("language").value === "hi"
-            ? /[\u0900-\u097f]/.test(text)
-            : $("language").value === "en"
-              ? !/[\u0900-\u097f]/.test(text)
-              : true,
+      ? passages.filter((t) =>
+          language === "hi"
+            ? /[\u0900-\u097f]/.test(t)
+            : !/[\u0900-\u097f]/.test(t),
         )
-      : topics[$("category").value];
-  let next = list[Math.floor(Math.random() * list.length)];
-  if (next === $("prompt").value)
-    next = list[(list.indexOf(next) + 1) % list.length];
-  $("prompt").value = next;
+      : Object.values(topics).flat();
+  const old = $("prompt").textContent;
+  let text = list[Math.floor(Math.random() * list.length)];
+  if (text === old && list.length > 1)
+    text = list[(list.indexOf(text) + 1) % list.length];
+  resetResult();
+  previous = null;
+  $("prompt").textContent = text;
+  $("prompt").hidden = false;
+  $("prompt-placeholder").hidden = true;
+  updateRecord();
+  $("status").textContent =
+    "Prompt ready. Press Start recording when you are ready.";
 }
-function download(name, text, type = "text/plain") {
-  const url = URL.createObjectURL(new Blob([text], { type }));
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-function timeline() {
-  const query = $("search-recording").value.toLocaleLowerCase();
-  $("timeline").replaceChildren();
-  for (const segment of segments) {
-    if (query && !segment.text.toLocaleLowerCase().includes(query)) continue;
-    const row = document.createElement("div");
-    row.className = "segment";
-    const button = document.createElement("button");
-    button.className = "button";
-    button.textContent = `${Math.floor(segment.start / 60)}:${String(Math.floor(segment.start) % 60).padStart(2, "0")} — listen`;
-    button.onclick = () => {
-      $("playback").currentTime = segment.start;
-      $("playback")
-        .play()
-        .catch(() => tell("Press Play to hear this moment."));
-    };
-    const text = document.createElement("textarea");
-    text.rows = 2;
-    text.value = segment.text;
-    text.setAttribute("aria-label", `Caption at ${segment.start} seconds`);
-    text.oninput = () => (segment.text = text.value.slice(0, 6000));
-    row.append(button, text);
-    $("timeline").append(row);
-  }
-}
-function bookmarks() {
-  $("bookmarks").replaceChildren();
-  for (const time of marks) {
-    const b = document.createElement("button");
-    b.className = "button";
-    b.textContent = `Bookmark ${time}s`;
-    b.onclick = () => {
-      $("playback").currentTime = time;
-      $("playback")
-        .play()
-        .catch(() => {});
-    };
-    $("bookmarks").append(b);
-  }
-}
-function library() {
-  try {
-    const data = JSON.parse(localStorage.getItem("vani-library") || "[]");
-    return Array.isArray(data)
-      ? data
-          .filter(
-            (n) => n && typeof n.text === "string" && n.text.length <= 12000,
-          )
-          .slice(-20)
-      : [];
-  } catch {
-    return [];
-  }
-}
-function showLibrary() {
-  const query = $("library-search").value.toLowerCase();
-  $("library").replaceChildren();
-  for (const note of library().filter((n) =>
-    n.text.toLowerCase().includes(query),
-  )) {
-    const row = document.createElement("div");
-    row.className = "saved-note";
-    const title = document.createElement("p");
-    title.textContent = `${note.date || "Saved note"} · ${note.text.slice(0, 120)}`;
-    const load = document.createElement("button");
-    load.className = "button";
-    load.textContent = "Load text";
-    load.onclick = () => edit(() => note.text);
-    const remove = document.createElement("button");
-    remove.className = "button";
-    remove.textContent = "Delete";
-    remove.onclick = () => {
-      try {
-        localStorage.setItem(
-          "vani-library",
-          JSON.stringify(library().filter((n) => n.id !== note.id)),
-        );
-        showLibrary();
-      } catch {
-        tell("Could not update device storage.");
-      }
-    };
-    row.append(title, load, remove);
-    if (note.metrics) {
-      const p = document.createElement("p");
-      p.textContent = `${note.metrics.wpm} estimated words/min · ${note.metrics.longest_quiet}s longest quiet interval`;
-      row.append(p);
-    }
-    $("library").append(row);
-  }
-}
-$("new-prompt").onclick = prompt;
-$("practice-mode").onchange = prompt;
-$("category").onchange = prompt;
+$("new-prompt").onclick = newPrompt;
+$("practice-mode").onchange = clearPrompt;
+$("language").addEventListener("change", clearPrompt);
 $("try-again").onclick = () => {
-  if (busy) return;
-  previous = lastMetrics
-    ? { ...lastMetrics, prompt: lastPrompt, mode: lastMode }
-    : null;
-  edit(() => "");
+  if (busy || !attempt) return;
+  previous = attempt;
+  resetResult();
+  $("transcript").value = "";
+  $("transcript").dispatchEvent(new Event("input"));
+  $("playback").pause();
+  $("playback").hidden = true;
+  $("timer").textContent = "00:00";
+  updateRecord();
   $("record").focus();
-  tell("Same prompt is ready. Press Start recording for the next attempt.");
+  $("status").textContent = "Same prompt. Press Start recording to try again.";
 };
-$("bookmark").onclick = () => {
-  const [m, s] = $("timer").textContent.split(":").map(Number);
-  const time = document.body.classList.contains("is-recording")
-    ? m * 60 + s
-    : Math.floor($("playback").currentTime || 0);
-  marks.push(time);
-  bookmarks();
-};
-$("undo-edit").onclick = () => {
-  if (!busy && undo.length) {
-    editor.value = undo.pop();
-    update();
-  }
-};
-$("replace-all").onclick = () => {
-  const find = $("find-word").value;
-  if (find) edit((s) => s.split(find).join($("replace-word").value));
-};
-$("apply-glossary").onclick = () =>
-  edit((s) => {
-    for (const line of $("glossary").value.split("\n")) {
-      const [wrong, right] = line.split("→").map((x) => x.trim());
-      if (wrong && right) s = s.split(wrong).join(right);
-    }
-    return s;
-  });
-$("search-recording").oninput = timeline;
-$("export-txt").onclick = () => download("vani.txt", editor.value);
-for (const format of ["srt", "vtt"])
-  $(`export-${format}`).onclick = () => {
-    if (!segments.length)
-      return tell("Transcribe audio first to create timed captions.");
-    download(`vani.${format}`, captions(segments, format));
-  };
-$("export-bundle").onclick = () =>
-  download(
-    "vani-review.json",
-    JSON.stringify(
-      {
-        transcript: editor.value,
-        segments,
-        bookmarks: marks,
-        measurements: lastMetrics,
-        timing: "ASR chunk boundaries; not word-level alignment",
-      },
-      null,
-      2,
-    ),
-    "application/json",
-  );
-$("save-note").onclick = () => {
-  if (!$("save-consent").checked)
-    return tell("Enable device-only saving first.");
-  if (!editor.value.trim()) return tell("There is no text to save.");
-  try {
-    const notes = library();
-    notes.push({
-      id: crypto.randomUUID(),
-      date: new Date().toLocaleString(),
-      text: editor.value.slice(0, 12000),
-      metrics: lastMetrics,
-      prompt: lastPrompt,
-    });
-    localStorage.setItem("vani-library", JSON.stringify(notes.slice(-20)));
-    showLibrary();
-    tell("Saved on this device. Audio was not saved.");
-  } catch {
-    tell("Device storage is unavailable or full. Download your text instead.");
-  }
-};
-$("delete-library").onclick = () => {
-  try {
-    localStorage.removeItem("vani-library");
-    showLibrary();
-    tell("Saved notes deleted from this browser.");
-  } catch {
-    tell("Device storage is unavailable.");
-  }
-};
-$("library-search").oninput = showLibrary;
-let batchCanceled = false;
-$("batch-cancel").onclick = () => {
-  batchCanceled = true;
-  if (busy) $("cancel").click();
-};
-$("batch-start").onclick = async () => {
-  if (busy) return;
-  const files = [...$("batch-files").files];
-  if (files.length > 5) return tell("Select at most five files.");
-  batchCanceled = false;
-  $("batch-status").replaceChildren();
-  $("batch-start").disabled = true;
-  try {
-    for (const file of files) {
-      if (batchCanceled) break;
-      const item = document.createElement("li");
-      item.textContent = `${file.name}: processing`;
-      $("batch-status").append(item);
-      let succeeded = false;
-      const done = () => {
-        succeeded = true;
-      };
-      document.addEventListener("vani:result", done, { once: true });
-      await transcribeAudio(file, file.name, $("language").value);
-      document.removeEventListener("vani:result", done);
-      item.textContent = `${file.name}: ${succeeded ? "completed (text added above)" : "not completed; see status"}`;
-    }
-  } finally {
-    $("batch-start").disabled = false;
-  }
+$("review-transcript").onclick = () => {
+  const open = document.body.classList.toggle("show-transcript");
+  $("review-transcript").setAttribute("aria-expanded", String(open));
+  $("review-transcript").textContent = open
+    ? "Hide transcript"
+    : "Review transcript";
+  if (open) $("transcript").focus();
 };
 document.addEventListener("vani:phase", (event) => {
   busy = event.detail !== "idle";
-  for (const id of [
-    "practice-mode",
-    "category",
-    "duration",
-    "prompt",
-    "new-prompt",
-    "clip-start",
-    "clip-end",
-  ])
+  for (const id of ["practice-mode", "duration", "new-prompt"])
     $(id).disabled = busy;
-  if (event.detail === "requesting") {
-    lastPrompt = $("prompt").value;
-    lastMode = $("practice-mode").value;
-    marks = [];
-    bookmarks();
-  }
+  if (event.detail === "requesting" && practice()) resetResult();
+  updateRecord();
+});
+document.addEventListener("vani:route", (event) => {
+  stopFeedback();
+  $("review-transcript").setAttribute("aria-expanded", "false");
+  $("review-transcript").textContent = "Review transcript";
+  $("practice-result").hidden = event.detail !== "practice" || !attempt;
+  updateRecord();
 });
 document.addEventListener("vani:result", (event) => {
+  if (!practice()) return;
   const { result, samples } = event.detail;
-  segments = event.detail.segments;
-  timeline();
-  lastMetrics = measurements(samples, 16000, result.text);
+  const metrics = measurements(samples, 16000, result.text);
+  const reference = $("prompt").textContent;
   const reading = $("practice-mode").value === "read";
-  const match = reading ? agreement($("prompt").value, result.text) : null;
-  lastMetrics.agreement = match;
-  const m = lastMetrics;
-  let report = `${m.seconds}s recorded · ${m.words} recognized words · ${m.wpm} estimated words/min · ${m.quiet.length} quiet intervals ≥0.8s · longest ${m.longest_quiet}s. Possible um/uh/erm mentions: ${m.possible_fillers} (ASR can omit fillers).`;
-  if (reading)
-    report += ` Reference agreement: ${match}% (text edit distance, NOT pronunciation accuracy; review transcription first).`;
-  if (reading) {
-    const diff = referenceDiff($("prompt").value, result.text);
-    report += ` Reference words absent from recognition: ${diff.missing.slice(0, 12).join(", ") || "none"}. Extra/repeated recognized words: ${diff.extra.length}. Recognition errors can affect both.`;
-  }
-  report +=
-    " Quiet detection uses an amplitude threshold, not speech diagnosis. For your next try: " +
-    (m.longest_quiet > 3
-      ? "review the longest quiet interval and practise that transition."
-      : "open with one clear point and finish with a conclusion.");
-  $("practice-report").textContent = report;
-  if (
-    previous &&
-    previous.prompt === $("prompt").value &&
-    previous.mode === $("practice-mode").value
-  )
-    $("comparison").textContent =
-      `Previous → current: ${previous.wpm} → ${m.wpm} estimated words/min; ${previous.longest_quiet}s → ${m.longest_quiet}s longest quiet interval. Faster is not automatically better.`;
-  else
-    $("comparison").textContent =
-      "Retry the same prompt to compare attempts. Save an attempt to keep it on this device.";
-  lastPrompt = $("prompt").value;
-  lastMode = $("practice-mode").value;
+  const score = reading ? agreement(reference, result.text) : null;
+  attempt = { text: result.text, prompt: reference, metrics, reading };
+  const pace =
+    metrics.seconds >= 10
+      ? `About ${metrics.wpm} words/min`
+      : "Speak for at least 10 seconds to estimate pace";
+  $("practice-report").textContent =
+    `${metrics.seconds}s recorded · ${pace} · ${metrics.longest_quiet}s longest quiet interval`;
+  $("practice-tip").textContent = reading
+    ? `Reference word match: ${score}%. Check the transcript before using this estimate; it is not a pronunciation score.`
+    : metrics.longest_quiet > 3
+      ? "Next time, listen to the long pause and practise that transition. Try adding one concrete example."
+      : "For your next attempt, make one clear point, add an example, and finish with a short conclusion.";
+  $("comparison").textContent =
+    previous && previous.prompt === reference && previous.reading === reading
+      ? `Last attempt: ${previous.metrics.seconds}s recorded${previous.metrics.seconds >= 10 ? `, about ${previous.metrics.wpm} words/min` : ""}. Faster is not always better.`
+      : "";
+  $("ai-output").textContent = "";
+  $("ai-status").textContent = "";
+  $("ai-run").disabled = false;
+  $("practice-result").hidden = false;
+  setTimeout(() => {
+    if (practice())
+      $("practice-result").scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+  }, 0);
 });
 $("ai-run").onclick = async () => {
-  if (!$("ai-consent").checked)
-    return ($("ai-status").textContent =
-      "Enable consent before sending text to Gemini.");
-  if (!editor.value.trim())
-    return ($("ai-status").textContent = "Add a transcript first.");
+  if (!attempt || busy) return;
+  const id = ++revision;
+  feedbackAbort?.abort();
+  const controller = new AbortController();
+  feedbackAbort = controller;
+  const timeout = setTimeout(() => controller.abort(), 45000);
   $("ai-run").disabled = true;
-  $("ai-status").textContent = "Requesting an AI suggestion…";
+  $("ai-status").textContent = "Preparing your feedback…";
+  const body = {
+    text: attempt.text,
+    action: "coach",
+    context: attempt.prompt,
+    language: $("language").value === "hi" ? "Hindi" : "English",
+    consent: true,
+  };
   try {
-    const body = {
-      text: editor.value,
-      action: $("ai-action").value,
-      context: $("prompt").value,
-      language: $("ai-language").value,
-      consent: true,
-    };
-    const config = await (await fetch("./config.json")).json();
+    const config = await (
+      await fetch("./config.json", { signal: controller.signal })
+    ).json();
     let result;
     if (config.space) {
       const { Client } =
         await import("https://cdn.jsdelivr.net/npm/@gradio/client@2.8.0/dist/index.min.js");
+      if (controller.signal.aborted) throw new Error("Feedback stopped.");
       const client = await Client.connect(config.space);
+      if (controller.signal.aborted) throw new Error("Feedback stopped.");
       result = (
-        await client.predict("/assist", {
-          text: body.text,
-          action: body.action,
-          context: body.context,
-          language: body.language,
-          consent: true,
-        })
+        await Promise.race([
+          client.predict("/assist", body),
+          new Promise((_, reject) =>
+            controller.signal.addEventListener(
+              "abort",
+              () => reject(new Error("Feedback timed out. Try again later.")),
+              { once: true },
+            ),
+          ),
+        ])
       ).data[0];
     } else {
       const response = await fetch("./api/assist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(45000),
+        signal: controller.signal,
       });
       result = await response.json();
       if (!response.ok)
         throw new Error(
           typeof result.detail === "string"
             ? result.detail
-            : "AI request rejected.",
+            : "Coaching is unavailable. Please try later.",
         );
     }
-    $("ai-output").value = result.text;
+    if (id !== revision) return;
+    if (typeof result.text !== "string" || !result.text.trim())
+      throw new Error(
+        "No usable feedback returned. Your recording and text are safe.",
+      );
+    $("ai-output").textContent = result.text;
     $("ai-status").textContent =
-      "AI suggestion. Check meaning, names and dates; your original is unchanged.";
+      "AI coaching — use the suggestions that help you.";
   } catch (error) {
-    $("ai-status").textContent =
-      error.message || "AI unavailable. Your text is unchanged.";
+    if (id === revision) {
+      $("ai-status").textContent =
+        error.name === "AbortError"
+          ? "Feedback timed out. Please try later."
+          : error.message;
+      $("ai-run").disabled = false;
+    }
   } finally {
-    $("ai-run").disabled = false;
+    clearTimeout(timeout);
+    if (id === revision) feedbackAbort = null;
   }
 };
-$("copy-ai").onclick = () =>
-  navigator.clipboard.writeText($("ai-output").value).catch(() => {
-    $("ai-output").focus();
-    $("ai-output").select();
-    $("ai-status").textContent = "Press Ctrl+C to copy the selected draft.";
-  });
-prompt();
-showLibrary();
+updateRecord();

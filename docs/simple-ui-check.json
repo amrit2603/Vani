@@ -1,0 +1,18 @@
+{
+  "tests": [
+    "two-navigation-choices",
+    "no-advanced-controls",
+    "explicit-prompt-generation",
+    "independent-room-drafts",
+    "record-and-feedback",
+    "explicit-AI-coaching",
+    "navigation-discards-pending-AI",
+    "existing-local-notes-preserved",
+    "review-transcript",
+    "same-prompt-retry",
+    "read-aloud-reference-match",
+    "mobile-no-overflow"
+  ],
+  "errors": [],
+  "limits": "Synthetic microphone with mocked ASR and AI network replies."
+}

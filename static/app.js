@@ -13,9 +13,11 @@ let lastAudio = null;
 let playbackUrl = null;
 let configuration;
 let remoteClient;
+let currentRoom = "dictate";
+const drafts = { dictate: "", practice: "" };
 
 transcript.placeholder =
-  "Your voice goes here.\n\nStart recording, or choose an audio file. Your words will appear here, ready to edit and copy.";
+  "Your words will appear here. Start recording when you’re ready.";
 
 function say(message, tone = "") {
   status.textContent = message;
@@ -35,7 +37,10 @@ function setPhase(next) {
   phase = next;
   document.body.classList.toggle("is-recording", next === "recording");
   const busy = next !== "idle";
-  record.disabled = next === "requesting" || next === "processing";
+  record.disabled =
+    next === "requesting" ||
+    next === "processing" ||
+    (location.hash === "#practice" && !$("prompt").textContent.trim());
   record.querySelector("span").textContent =
     next === "recording"
       ? "Stop & transcribe"
@@ -44,7 +49,7 @@ function setPhase(next) {
         : "Start recording";
   $("cancel").hidden = !busy;
   $("language").disabled = busy;
-  $("audio-file").disabled = busy;
+
   $("retry").hidden = busy || !lastAudio;
   transcript.readOnly = next === "processing";
   $("record-state").textContent =
@@ -165,18 +170,8 @@ async function transcribeAudio(blob, filename, language) {
     const settings = await ensureService();
     const samples = await decode(blob);
     const fullSeconds = samples.length / 16000;
-    const from = Number(document.getElementById("clip-start")?.value || 0);
-    const to = Number(
-      document.getElementById("clip-end")?.value || fullSeconds,
-    );
-    if (
-      !Number.isFinite(from) ||
-      !Number.isFinite(to) ||
-      from < 0 ||
-      to > fullSeconds + 0.1 ||
-      to <= from
-    )
-      throw new Error("Choose a valid clip range within the recording.");
+    const from = 0,
+      to = fullSeconds;
     const segments = [];
     let result;
     for (let start = from; start < to; start += 30) {
@@ -229,14 +224,12 @@ async function transcribeAudio(blob, filename, language) {
       throw new Error(
         "No speech was recognized. Try speaking a little closer to the microphone.",
       );
-    const draft = document.getElementById("voice-edits")?.checked
-      ? result.text
-          .replace(/\bnew paragraph\b[,.]?/gi, "\n\n")
-          .replace(/\bnew line\b[,.]?/gi, "\n")
-      : result.text;
-    transcript.value = [transcript.value.trim(), draft.trim()]
-      .filter(Boolean)
-      .join("\n\n");
+    transcript.value =
+      location.hash === "#practice"
+        ? result.text.trim()
+        : [transcript.value.trim(), result.text.trim()]
+            .filter(Boolean)
+            .join("\n\n");
     updateEditor();
     $("result-meta").textContent = [
       result.language,
@@ -245,7 +238,9 @@ async function transcribeAudio(blob, filename, language) {
       .filter(Boolean)
       .join(" · ");
     say(
-      "There you are. Your words are ready to edit and copy. Record again to add more.",
+      location.hash === "#practice"
+        ? "Your feedback is ready below."
+        : "Your words are ready. Edit and copy, or record again to add more.",
     );
     document.dispatchEvent(
       new CustomEvent("vani:result", {
@@ -260,7 +255,7 @@ async function transcribeAudio(blob, filename, language) {
         },
       }),
     );
-    transcript.focus();
+    if (location.hash !== "#practice") transcript.focus();
     // A successful recording is not offered as a retry, avoiding duplicate paragraphs.
     lastAudio = null;
   } catch (error) {
@@ -296,7 +291,7 @@ async function startRecording() {
     await ensureService();
     if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder)
       throw new Error(
-        "This browser cannot record audio here. Open the HTTPS site in a current browser, or choose an audio file.",
+        "This browser cannot record audio here. Open the HTTPS site in a current browser, and try again.",
       );
     stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     if (token !== generation)
@@ -383,9 +378,8 @@ async function startRecording() {
     setPhase("idle");
     const messages = {
       NotAllowedError:
-        "Microphone access was blocked. Allow it in your browser’s site settings, or choose an audio file.",
-      NotFoundError:
-        "No microphone was found. Connect one, or choose an audio file.",
+        "Microphone access was blocked. Allow it in your browser’s site settings, and try again.",
+      NotFoundError: "No microphone was found. Connect one, and try again.",
       NotReadableError:
         "Your microphone is busy. Close other recording apps and try again.",
     };
@@ -427,18 +421,6 @@ $("retry").addEventListener("click", () => {
   if (lastAudio && phase === "idle")
     transcribeAudio(lastAudio.blob, lastAudio.filename, lastAudio.language);
 });
-$("audio-file").addEventListener("change", async (event) => {
-  const file = event.target.files[0];
-  event.target.value = "";
-  if (!file || phase !== "idle") return;
-  if (!file.size || file.size > MAX_BYTES)
-    return say(
-      "Choose a nonempty audio file under 10 MB and two minutes.",
-      "error",
-    );
-  rememberAudio(file, file.name);
-  await transcribeAudio(file, file.name, lastAudio.language);
-});
 transcript.addEventListener("input", updateEditor);
 $("clear").addEventListener("click", () => {
   transcript.value = "";
@@ -464,8 +446,8 @@ const info = {
   how: [
     "HOW IT WORKS",
     [
-      "Open the workspace and choose Hindi, English, or automatic detection for mixed speech.",
-      "Start recording and allow the microphone when your browser asks. Speak naturally, then stop to transcribe. You can also choose an audio file.",
+      "Open Workspace, press Start recording, then stop to see your text.",
+      "Start recording and allow the microphone when your browser asks. Speak naturally, then stop to transcribe. Edit your transcript and copy it wherever you need it.",
       "Review your transcript, change any words, and copy it into your notes, messages, or documents. Record again to add another paragraph.",
       "The open-source model runs on a server. Nothing needs installing and visitors do not download model weights. A free shared-GPU demo may have a queue or daily usage limits.",
     ],
@@ -474,7 +456,7 @@ const info = {
     "YOUR VOICE. YOUR CHOICE.",
     [
       "Recording begins only after you press Start recording and allow microphone access. You can cancel at any time.",
-      "When you stop or choose a file, the audio is sent to the transcription server. This is server-side transcription, not on-device processing.",
+      "When you stop, the audio is sent to the transcription server for transcription.",
       "The app does not deliberately save transcript history or add recordings to a database. Uploads can exist temporarily on the server. Hosting providers may keep operational logs and apply their own policies.",
       "Your editable text stays in this page until you close or refresh it. Copy anything you want to keep. Do not submit sensitive recordings to a public demo.",
     ],
@@ -482,8 +464,8 @@ const info = {
   help: [
     "A LITTLE HELP.",
     [
-      "Microphone blocked? Allow microphone access in your browser’s site settings, or choose an existing audio file.",
-      "Use a short, clear recording in a quiet place. Files must be under 10 MB and two minutes. Hindi text may use Devanagari; Romanized Hinglish is not guaranteed.",
+      "Microphone blocked? Allow microphone access in your browser’s site settings, then try recording again.",
+      "Use a short, clear recording in a quiet place. Record for up to five minutes. Hindi text may use Devanagari; Romanized Hinglish is not guaranteed.",
       "Waiting for a free GPU? Shared hosting can queue requests or reach a daily quota. Try again later. Local CPU mode can also be slower than real time.",
       "The transcript appears after recording ends. Always review it: speech recognition can miss or change words, especially when switching languages.",
     ],
@@ -491,17 +473,48 @@ const info = {
 };
 
 function route() {
-  const page = location.hash.slice(1) || "home";
-  if (phase === "recording" || phase === "requesting") {
-    if (!["dictate", "practice"].includes(page)) cancel();
+  const requested = location.hash.slice(1) || "home";
+  const page = ["home", "dictate", "practice", ...Object.keys(info)].includes(
+    requested,
+  )
+    ? requested
+    : "home";
+  if (phase !== "idle") cancel();
+  drafts[currentRoom] = transcript.value;
+  if (page === "dictate" || page === "practice") {
+    currentRoom = page;
+    transcript.value = drafts[page];
+    updateEditor();
   }
-  $("home-view").hidden =
-    page !== "home" &&
-    !(!info[page] && !["dictate", "practice"].includes(page));
+  document.body.classList.toggle("is-practice", page === "practice");
+  document.body.classList.remove("show-transcript");
+  $("home-view").hidden = page !== "home";
   $("dictate-view").hidden = !["dictate", "practice"].includes(page);
-  document.getElementById("practice-panel").hidden = page !== "practice";
+  $("dictate-view").setAttribute(
+    "aria-labelledby",
+    page === "practice" ? "practice-title" : "workspace-title",
+  );
+  $("workspace-intro").hidden = page !== "dictate";
+  $("practice-panel").hidden = page !== "practice";
   $("info-view").hidden = !info[page];
   document.querySelector(".workspace-brand").hidden = page === "home";
+  for (const link of document.querySelectorAll("nav a")) {
+    if (link.hash === "#" + page) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  }
+  $("playback").pause();
+  $("playback").hidden = true;
+  lastAudio = null;
+  $("retry").hidden = true;
+  $("timer").textContent = "00:00";
+  $("result-meta").textContent = "";
+  setPhase("idle");
+  say(
+    page === "practice"
+      ? "Choose New prompt, then start recording."
+      : "Ready when you are.",
+  );
+  document.dispatchEvent(new CustomEvent("vani:route", { detail: page }));
   if (info[page]) {
     $("info-title").textContent = info[page][0];
     $("info-copy").replaceChildren(
@@ -513,14 +526,21 @@ function route() {
     );
   }
   document.title =
-    page === "dictate"
-      ? "Your workspace — Vani"
-      : "Vani — Your voice, in words";
+    page === "practice"
+      ? "Practice — Vani"
+      : page === "dictate"
+        ? "Your workspace — Vani"
+        : "Vani — Your voice, in words";
   window.scrollTo(0, 0);
 }
 window.addEventListener("hashchange", route);
 window.addEventListener("beforeunload", (event) => {
-  if (phase !== "idle" || transcript.value.trim()) event.preventDefault();
+  if (
+    phase !== "idle" ||
+    transcript.value.trim() ||
+    Object.values(drafts).some((text) => text.trim())
+  )
+    event.preventDefault();
 });
 
 const penguin = $("penguin");
@@ -537,15 +557,6 @@ $("motion-toggle").addEventListener("click", () => motion(!penguin.paused));
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 if (reducedMotion.matches) motion(true);
 reducedMotion.addEventListener("change", (event) => motion(event.matches));
-async function transcribeFile(blob, filename, language) {
-  if (phase !== "idle") return;
-  if (!blob.size || blob.size > MAX_BYTES)
-    return say("Choose nonempty audio under 10 MB.", "error");
-  rememberAudio(blob, filename);
-  lastAudio.language = language;
-  return transcribeAudio(blob, filename, language);
-}
-export { transcribeAudio, transcribeFile };
 route();
 updateEditor();
 import("./studio.js");

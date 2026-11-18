@@ -6,20 +6,6 @@ export function words(text) {
       .match(/[\p{L}\p{M}\p{N}]+/gu) || []
   );
 }
-export function referenceDiff(reference, text) {
-  const available = new Map();
-  for (const word of words(text))
-    available.set(word, (available.get(word) || 0) + 1);
-  const missing = [];
-  for (const word of words(reference)) {
-    if (available.get(word)) available.set(word, available.get(word) - 1);
-    else missing.push(word);
-  }
-  return {
-    missing,
-    extra: [...available].flatMap(([word, count]) => Array(count).fill(word)),
-  };
-}
 export function agreement(reference, text) {
   const a = words(reference).slice(0, 1500),
     b = words(text).slice(0, 4000);
@@ -120,19 +106,4 @@ export async function decode(blob) {
   } finally {
     await context.close();
   }
-}
-export function captions(segments, format) {
-  const clock = (t) => {
-    const ms = Math.round(t * 1000);
-    return `${String(Math.floor(ms / 3600000)).padStart(2, "0")}:${String(Math.floor(ms / 60000) % 60).padStart(2, "0")}:${String(Math.floor(ms / 1000) % 60).padStart(2, "0")}${format === "srt" ? "," : "."}${String(ms % 1000).padStart(3, "0")}`;
-  };
-  return (
-    (format === "vtt" ? "WEBVTT\n\n" : "") +
-    segments
-      .map(
-        (s, i) =>
-          `${format === "srt" ? i + 1 + "\n" : ""}${clock(s.start)} --> ${clock(s.end)}\n${s.text.replace(/-->/g, "→")}\n`,
-      )
-      .join("\n")
-  );
 }

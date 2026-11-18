@@ -2,9 +2,9 @@
 
 Standalone local Hindi, English, and Hinglish dictation powered by Qwen3-ASR. MIT-licensed application code; model weights and dependencies retain their own licenses. This is an independent project, not affiliated with Wispr Flow or OpenAI Whisper.
 
-**Your voice, in words.** The video-inspired landing page and recording workspace are implemented: record/upload, stop, transcribe, edit and copy. No visitor installation or model download. The project is independent of NILE's workflows.
+**Your voice, in words.** The video-inspired landing page and recording workspace are implemented: record, stop, transcribe, edit and copy. No visitor installation or model download. The project is independent of NILE's workflows.
 
-**Practice and productivity tools:** Read Aloud / Topic Speaking, 2/3/5-minute sessions, observable speaking metrics, retry comparison, chunk-timed playback/search, caption exports, batch audio, editing/personal terms, optional device-only history and consent-based Gemini coaching/rewriting. See [scope, setup and limitations](docs/practice-release.md). Speaker labels, pronunciation grading and live drafts are deferred. The appearance and animated landing are retained.
+**Two simple rooms:** Workspace for dictation, editing and copying. Practice for Speak on a Topic / Read Aloud with 2/3/5-minute sessions, a prompt generated only after clicking New prompt, concise feedback, same-prompt retry and optional Gemini coaching. No setup wizard, batch uploads or advanced tool panels. See [scope, setup and limitations](docs/practice-release.md). The original appearance and animated landing are retained.
 
 Open <http://127.0.0.1:8787/> after starting the server. Browser-flow checks cover synthetic recording, cancellation, clipboard, retries and mobile layout; actual ASR checks are recorded separately. The intended public site is **vani.amritkumar.dev**, with a separate **shubhamsingh123/vani-speech** ZeroGPU service. These are deployment targets, not claimed live URLs. Follow [the verified free deployment plan](docs/free-deployment.md).
 
@@ -12,7 +12,7 @@ Open <http://127.0.0.1:8787/> after starting the server. Browser-flow checks cov
 
 Create upload packages with `.\.venv\Scripts\python.exe prepare_release.py`: `dist/web`, `dist/space`, `dist/vani-website.zip` and `dist/vani-space.zip`. Public speech uses the separate native Transformers runtime in `hosting/requirements.txt`; do not expose the legacy local API publicly. Free hosted inference has queues and daily quotas.
 
-Optional browser checks: `npm.cmd install --prefix tmp/qa playwright`, then `node tests/browser.cjs` against the running local server. These use a synthetic microphone and mocked ASR replies; see docs for separate real-model results.
+Optional browser checks: `npm.cmd install --prefix tmp/qa playwright`, then `node tests/browser.cjs` and `node tests/simple-ui.cjs` against the running local server. These use a synthetic microphone and mocked ASR replies; see docs for separate real-model results.
 
 ## Local setup (Windows)
 
@@ -36,7 +36,7 @@ curl.exe -F "audio=@sample.wav" -F "language=hi-en" http://127.0.0.1:8787/api/tr
 
 ## Limits and privacy
 
-- At most 10 MB and 120 seconds per recording. One active transcription; concurrent attempts receive 429 with Retry-After.
+- Browser recordings: up to five minutes / 10 MB, split into bounded 30-second requests. Direct API uploads: 10 MB / 120 seconds. One active transcription; concurrent attempts receive 429 with Retry-After.
 - Decoding and inference run in a reusable subprocess with a five-minute deadline. A timeout terminates and resets that process.
 - Uploaded files are closed and no audio/transcript history is deliberately retained. Multipart uploads may spool to OS temporary storage while being parsed, then are closed; this is not a forensic erasure guarantee.
 - Health checks report API liveness, not model readiness. First-request time includes model loading.

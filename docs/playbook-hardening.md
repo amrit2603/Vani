@@ -62,3 +62,11 @@ The [official Qwen3-ASR repository](https://github.com/QwenLM/Qwen3-ASR) documen
 - Closing an HTTP client does not immediately stop a running model job; it remains bounded by the worker deadline. A future UI must explain cancellation honestly.
 - Sample-count limits bound decoded output but do not replace OS process memory/resource isolation for hostile codecs. Public hosting needs stronger isolation and the controls in deployment.md.
 - No public hosting, GitHub push, GPU path, desktop hotkey/paste, capacity/SLO commitment, or license-complete distribution audit has been performed.
+
+## Simplified UI verification — 2026-11-18
+
+The latest interface replaces the expanded studio with Workspace (record, edit, copy) and Practice (mode, duration, explicitly generated prompt, record, feedback, same-prompt retry). No personalization, batch uploads or advanced tool panels. The original landing and animated penguin remain. Existing device notes are untouched; separate in-page drafts prevent practice text replacing workspace writing.
+
+All 26 Python tests, Node metric/WAV checks and Ruff pass. The dictation browser flow passes for recording, clipboard, cancellation, failed transcription preserving text, retry and mobile overflow. The simplified browser flow passes for explicit prompt generation, separate drafts, reference agreement, explicit mocked AI coaching, discarding pending feedback on navigation, preserving existing local notes, same-prompt retry and desktop/mobile layout. One concurrent baseline browser run timed out entering Workspace; the sequential rerun passed. No new real AI request or physical microphone test was performed. See simple-ui-check.json and current screenshots/vani-workspace.png and vani-practice.png. Old studio-check.json is historical and covers removed controls.
+
+No inference/runtime dependency or server security change. Existing ASR accuracy, dependency-advisory, hosted quota and deployment limitations above still apply. Feedback is observational, not a communication-ability or pronunciation grade. Pace is withheld below ten seconds to avoid misleading short-recording estimates.

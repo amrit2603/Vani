@@ -1,34 +1,25 @@
-# Practice and transcript workspace
+# Simple workspace and practice
 
-The core is still voice-to-text. The existing landing design and penguin animation are preserved; Practice is a separate navigation destination at `/#practice`.
+The core is voice-to-text. The original landing design and penguin animation remain. Main navigation has two choices: Workspace and Practice.
 
-## Implemented
+## Current interface
 
-- Read Aloud and Topic Speaking, editable original passages and randomly selected topics across everyday, college, technology and interview categories.
-- 2/3/5-minute recording presets. Files are limited to 10 MB and five minutes in the browser, resampled locally and sent as sequential 30-second WAV sections to the existing bounded ASR service. Direct backend uploads retain their two-minute bound.
-- Duration, ASR word count, estimated words/minute, amplitude-based quiet intervals and longest quiet interval. Possible um/uh/erm counts are transcript estimates; the model may omit fillers.
-- Read-aloud text agreement using normalized word edit distance, with missing/extra recognized-word observations. This is not pronunciation or ability scoring.
-- Same-prompt retry comparison, timestamped playback at chunk boundaries, recording bookmarks, search of the latest recording, editable captions, TXT/SRT/VTT and JSON review-bundle exports.
-- Find/replace, undo of those edits, explicit personal-term replacements, and opt-in English “new paragraph” / “new line” dictation formatting. Vocabulary replacement is post-editing, not an accuracy guarantee.
-- Up to five audio files processed serially; batch cancellation prevents subsequent files and completed text remains. Each file updates playback to that file. Individual failed files retain a retry path.
-- Opt-in device-only text/measurement library (20 notes), note search, load and deletion. Audio is never saved to the library. Clipboard and files remain user-triggered.
-- Optional Gemini coaching, cleanup, messages, work updates, structured notes/action items and Hindi/English translation. Source transcript remains unchanged. Consent is required before sending text/prompt to Google; no audio is sent to Gemini.
+- Workspace: select language, record, stop, edit and copy. Record again to append another paragraph. Failed transcription preserves existing text and offers a retry.
+- Practice: choose Speak on a Topic or Read Aloud and a 2/3/5-minute session. Click New prompt to select an authored topic or passage. Nothing is generated on entry or when changing mode.
+- Record, stop, then see duration, estimated pace for recordings of at least ten seconds, longest quiet interval and a short suggestion. Read Aloud also shows normalized reference word agreement, not pronunciation grading.
+- Try this prompt again retains the prompt and compares the previous attempt. Review transcript reveals the editable recording text. Workspace and Practice drafts stay separate while the page is open.
+- Get AI coaching is optional and explicitly sends that attempt's text and prompt to Gemini. It never runs automatically. Changing prompt or leaving the room discards pending feedback.
 
-## Gemini setup and limits
+Removed from the interface: personalization, uploads/batch processing, clipping, caption exports, find/replace, custom vocabulary, bookmarks and saved-history controls. Previously saved browser notes are not deleted. Advanced backend assist actions remain available to existing API clients, but the UI exposes coaching only.
 
-Use `.env.example` as a template for an ignored `.env`, with `GEMINI_API_KEY` and an account-supported `GEMINI_MODEL`. The local helper reads settings on each request. For the hosted Space, use server Secrets, never static/config.json. `coaching.py` is included in the six-file service export; the key file is excluded.
+## Bounds and privacy
 
-Gemini uses the official REST generateContent endpoint through existing httpx. Key travels in a header, not a URL. Text/context limits, 40-second network timeout, output-token cap, one active request, 10-second spacing and a 50-request rolling-day **per-process** limit are enforced. There are no automatic retries or billing/plan changes. This demo limiter resets on server restart and is not a provider spending cap or distributed abuse prevention. Provider billing, free-tier eligibility and data policies depend on the user's Google project.
+Browser recordings are limited to five minutes / 10 MB, resampled locally, and sent as sequential 30-second WAV sections. The direct API retains its two-minute bound. Text appears after stopping, rather than as live partial captions. Copy anything needed before closing or refreshing.
 
-Source: [Google generateContent REST reference](https://ai.google.dev/api/generate-content). All AI output is untrusted plain text; it is not sent, executed or used as a certified grade.
+For optional coaching, put GEMINI_API_KEY and GEMINI_MODEL in the ignored server-side .env using .env.example. Hosted deployments use Space Secrets. The key is never included in frontend files or release packages. The unchanged helper has a 40-second network timeout, input/output limits, one active request, ten-second spacing and 50 requests per rolling day per process. No automatic retries or plan changes. This local limiter is not a provider spending cap; provider billing and free-tier eligibility depend on the user's Google project.
 
-## Validation
+## Validation and limits
 
-- 26 Python tests pass, including no-consent rejection, input limits, unavailable configuration, secret-header handling, request spacing and key-file isolation.
-- Node self-checks verify edit-distance agreement, quiet interval calculations, WAV encoding and SRT/VTT serialization.
-- Existing browser-flow suite passes. New browser suite verifies the separate Practice route, read-aloud comparison, replace/undo, storage consent, five minutes split into ten bounded requests, editable SRT output, search, Gemini consent/source preservation, and mobile overflow. ASR and AI replies in these browser-flow checks are mocked.
-- Real ASR browser upload/clipboard smoke passed with a synthesized English voice note. Real Gemini coaching returned HTTP 200 for an explicitly consented synthetic project description. See gemini-smoke.json, studio-check.json and local-browser-asr.json. No natural Hindi/Hinglish accuracy or physical microphone certification.
+Run node tests/browser.cjs, node tests/simple-ui.cjs, node tests/speech-tools.mjs and the Python tests described in README.md. Browser tests use a synthetic microphone and mocked ASR/AI responses; current simplified-flow results are in simple-ui-check.json and browser-check.json. Historical studio-check.json covers the older expanded interface and is not evidence for current UI controls. Earlier actual model checks remain in local-browser-asr.json and gemini-smoke.json; no new paid AI request was needed for this UI change.
 
-## Explicitly deferred by the user
-
-Speaker diarization, pronunciation grading and live partial transcription require a separate model/latency proposal and validation. They are not represented as implemented or hidden behind fabricated scores. Captions are coarse chunk timings, not word-aligned professional subtitle timing. Hosted deployment, quotas and longer natural recordings still need verification on the user's real Space.
+Pace uses recognized words divided by recording time. Quiet intervals use amplitude, which is sensitive to microphone/background noise. Neither is an ability grade. Speaker labels, pronunciation grading and live partial transcription remain deferred. No natural Hindi/Hinglish accuracy or physical microphone certification. Public hosting is prepared, not deployed; free shared inference has queues and quotas.

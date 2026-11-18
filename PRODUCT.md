@@ -20,7 +20,7 @@ A standalone open-source browser dictation tool, independent of NILE Instinct AI
 
 ## Operating Context
 
-Windows local CPU use first. Record or upload audio, transcribe, edit, copy. Global shortcuts and direct insertion into other applications are deferred by the user.
+Windows local CPU use first. Record, stop, transcribe, edit, copy. Global shortcuts and direct insertion into other applications are deferred by the user.
 
 ## Capabilities and Constraints
 
@@ -45,3 +45,7 @@ Keep voice-to-text as the core; put Read Aloud and Topic Speaking in a separate 
 ## Evidence on Hand
 
 Existing NILE transcription implementation and documented CPU observations. Fresh standalone checks are recorded under docs/playbook-hardening.md. No natural multilingual accuracy corpus was supplied.
+
+## Simplicity requirement
+
+Workspace and Practice are the only main navigation choices. No onboarding, personalization, batch upload, history or advanced editing panels. Practice prompts appear only after New prompt is clicked. Show a short result after recording, with same-prompt retry and optional transcript review / explicitly requested AI coaching. Preserve the original visual language and animation. Existing browser history data is left untouched, with no new persistence.

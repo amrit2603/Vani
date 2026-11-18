@@ -9,6 +9,7 @@ const path = require('node:path');
   const browser = await chromium.launch({ executablePath, headless: true, args: [
     '--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream',
   ] });
+  try {
   const context = await browser.newContext({ viewport: { width: 1440, height: 800 }, permissions: ['microphone', 'clipboard-read', 'clipboard-write'] });
   const page = await context.newPage();
   const errors = [];
@@ -44,9 +45,10 @@ const path = require('node:path');
   assert.equal(uploads, before);
   assert.match(await page.locator('#status').textContent(), /canceled/);
   fail = true;
-  const {wav}=await import('../static/speech-tools.mjs');
-  const fixture=Buffer.from(await wav(new Float32Array(16000).fill(.1)).arrayBuffer());
-  await page.locator('#audio-file').setInputFiles({ name: 'sample.wav', mimeType: 'audio/wav', buffer: fixture });
+  await page.getByRole('button', {name:'Start recording'}).click();
+  await page.getByRole('button', {name:'Stop & transcribe'}).waitFor();
+  await page.waitForTimeout(700);
+  await page.getByRole('button', {name:'Stop & transcribe'}).click();
   await page.waitForFunction(() => document.getElementById('status').textContent.includes('No speech'));
   assert.match(await page.locator('#transcript').inputValue(), /short voice note/);
   fail = false;
@@ -73,5 +75,5 @@ const path = require('node:path');
   fs.mkdirSync('docs', { recursive: true });
   fs.writeFileSync(path.join('docs', 'browser-check.json'), JSON.stringify(result, null, 2));
   console.log(JSON.stringify(result));
-  await browser.close();
+  } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });
