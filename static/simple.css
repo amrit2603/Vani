@@ -64,6 +64,8 @@
   line-height: 1.7;
 }
 #live-draft {
+  max-height: 180px;
+  overflow: auto;
   white-space: pre-wrap;
   line-height: 1.7;
   font-size: 16px;
@@ -338,5 +340,180 @@
   }
   .is-practice .transcript-panel {
     min-height: 240px;
+  }
+}
+
+.site-header nav {
+  position: relative;
+  isolation: isolate;
+}
+.site-header nav a {
+  position: relative;
+  z-index: 1;
+}
+.site-header nav a[aria-current="page"] {
+  background: transparent;
+}
+.nav-indicator {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: calc(100% - 1px);
+  background: var(--ink);
+  border-radius: 24px;
+  transition:
+    transform 0.3s ease,
+    width 0.3s ease;
+  z-index: 0;
+}
+#live-status:empty,
+#live-draft:empty {
+  display: none;
+}
+.writing-tools {
+  margin: 8px 0 24px;
+  padding: 18px 0;
+  border-top: 0;
+  border-bottom: 1px solid var(--rule);
+}
+.writing-tools h2 {
+  margin: 0 0 14px;
+}
+.feature-card {
+  position: fixed;
+  right: 18px;
+  top: 100px;
+  width: 260px;
+  z-index: 12;
+  perspective: 1100px;
+}
+.feature-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.feature-controls button,
+.card-open {
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  padding: 10px;
+  font-size: 12px;
+}
+.card-flip {
+  position: relative;
+  width: 100%;
+  height: 360px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
+  text-align: left;
+}
+.flipped .card-flip {
+  transform: rotateY(180deg);
+}
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border: 1px solid var(--rule);
+  border-radius: 22px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--ink);
+  color: var(--paper);
+  box-shadow: 0 12px 24px #10151f22;
+  overflow: auto;
+}
+.card-front {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.card-front img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+.card-front strong {
+  font:
+    600 44px/1.4 "Noto Serif Devanagari",
+    serif;
+}
+.card-back {
+  transform: rotateY(180deg);
+  background: #dce3e7;
+  color: var(--ink);
+  font-size: 12px;
+  gap: 10px;
+  line-height: 1.45;
+}
+.card-back strong {
+  font-size: 16px;
+}
+.card-hint {
+  font-size: 11px;
+  line-height: 1.6;
+  margin-top: 8px;
+}
+.feature-card.expanded {
+  width: 360px;
+}
+.feature-card.expanded .card-flip {
+  height: 460px;
+}
+.card-open {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 10;
+}
+@media (max-width: 1439px) {
+  .feature-card {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: min(360px, calc(100% - 38px));
+    margin: 12px auto 20px;
+  }
+  .card-flip {
+    height: 260px;
+  }
+  .card-front img {
+    width: 65px;
+    height: 65px;
+  }
+  .feature-card.expanded {
+    width: min(460px, calc(100% - 38px));
+  }
+  .feature-card.expanded .card-flip {
+    height: 400px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-indicator,
+  .card-flip {
+    transition: none;
+  }
+}
+
+@media (min-width: 1440px) {
+  .has-feature-card .workspace {
+    max-width: calc(100% - 300px);
+    margin-left: 0;
+    margin-right: 300px;
+  }
+  .has-feature-card.is-practice .workspace {
+    width: 940px;
+    margin-left: auto;
+  }
+  .has-feature-card.card-expanded .workspace {
+    max-width: calc(100% - 400px);
+    margin-right: 400px;
   }
 }

@@ -14,3 +14,7 @@ The MIT license in LICENSE covers this project's original application code. It d
 Audio decoder and transcription behavior were adapted from the user's local NILE Instinct AI implementation. No NILE secrets, recordings, model weights, databases, reference PDFs, or unrelated workflow functionality were copied. Before publishing, confirm rights to any upstream source you add beyond this extraction and audit the complete resolved distribution's licenses. This is not a complete software bill of materials.
 
 Browser API reference: [MDN MediaRecorder](https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder). No browser demo source is vendored.
+
+## Flip-card interaction reference
+
+The user supplied a React Bits FlipCard example and source as a visual/interaction reference. The application uses an original vanilla HTML/CSS/JavaScript implementation of click-to-flip, expand, dismiss and entry/exit motion; it does not bundle that React/Motion component or its dependencies. Existing fonts and penguin media notices above remain applicable.

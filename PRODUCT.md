@@ -52,4 +52,8 @@ Workspace and Practice are centered main navigation choices. No onboarding, pers
 
 ## Latest approved extension
 
-Practice is first in navigation and launcher. Optional opt-in browser-service live drafts supplement final Qwen transcription, with support/privacy/fallback notices. Transparent experimental delivery score and same-session retry comparison are separate from semantic AI coaching. Workspace exposes prompt creation and cleanup as explicit Gemini actions, leaving source text intact. Native Qwen streaming, pronunciation grading and daily progress storage are not implemented.
+Practice is first in navigation and launcher. Recording automatically starts browser preview, falling back to bounded four-second Qwen audio sections. Full-recording final transcription remains available after Stop. Support/privacy information is compact. Transparent experimental delivery score and same-session retry comparison are separate from semantic AI coaching. Workspace exposes prompt creation and cleanup as explicit Gemini actions, leaving source text intact. Native Qwen streaming, pronunciation grading and daily progress storage are not implemented.
+
+## Compact interface update
+
+Preserve landing design. Use a sliding black active tab and a dismissible/expandable Vani feature card on both rooms, inspired by the supplied FlipCard reference without changing the framework. Feature prompt tools above the editor. No separate live checkbox; microphone still starts only with Start recording. Native token streaming is not claimed.

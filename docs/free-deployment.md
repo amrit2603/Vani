@@ -19,7 +19,7 @@ The website runs on your domain. Recordings go directly to your own public ZeroG
 Proposed ID: `shubhamsingh123/vani-speech`. This is a target, not a claimed live deployment.
 
 1. Sign in to your Hugging Face account and verify its eligibility. Create a **Gradio** Space and choose **ZeroGPU** explicitly. Do not select paid hardware or add credits.
-2. Run `python prepare_release.py`, then upload the five files from `dist/space` to the Space repository root. Its README specifies Python 3.12.12, Gradio 6.32.0 and native Transformers.
+2. Run `python prepare_release.py`, then upload all files from `dist/space` to the Space repository root. Its README specifies Python 3.12.12, Gradio 6.32.0 and native Transformers.
 3. Wait for the build. Confirm ZeroGPU hardware and test actual English, Hindi and mixed recordings, including quota behavior as a logged-out visitor. GPU latency is unmeasured until this succeeds.
 4. The frontend calls the named `/transcribe` endpoint and expects one JSON result containing `text`, `language`, `audio_seconds` and inference metadata.
 
@@ -44,4 +44,12 @@ Enter credentials only in the official login flow, not in chat or source files. 
 5. Preserve the apex A record (`75.2.60.5`), `www` → `amrit2603-portfolio.netlify.app`, and unrelated records. A subdomain can use an external DNS provider; no portfolio nameserver transfer is required.
 6. Wait for DNS/TLS validation. Test the exact HTTPS domain on desktop/mobile, then add the verified demo link to the GitHub README and portfolio.
 
-Public DNS currently points to name.com authoritative nameservers, so the new record belongs in the domain's Name.com DNS settings. Publication requires authenticated hosting sessions and that DNS access. No login, DNS change, Space creation, GitHub push or public deployment is claimed until performed and verified.
+Use the DNS provider currently authoritative for your domain. Publication needs your authenticated hosting accounts and DNS access; the public Hugging Face username alone is insufficient. The GitHub source is published; the website/domain and Space are not claimed deployed.
+
+## Gemini and final acceptance
+
+Set GEMINI_API_KEY and GEMINI_MODEL as Space Secrets for coaching/prompt tools. Never upload .env or place a key in static config.json. Local .env settings do not automatically transfer to hosting.
+
+The current frontend automatically requests live previews while recording. Browser speech support and provider connectivity vary; Qwen fallback calls /transcribe for four-second sections. Test this on your own deployed Space: first preview before Stop, final transcript after Stop, audio playback/download, cancellation, Hindi/English, and a logged-out visitor. These additional GPU calls count toward daily quotas and may queue. Neither this guide nor free hardware guarantees instant word-by-word transcription or capacity for 100 concurrent users.
+
+Keep your existing portfolio records unchanged. In Cloudflare Pages first add vani.amritkumar.dev under Custom domains, then create the CNAME vani pointing to the actual generated project.pages.dev hostname. Adding DNS alone without associating the domain in Pages is insufficient. Wait for HTTPS activation, then test the exact domain before sharing it.

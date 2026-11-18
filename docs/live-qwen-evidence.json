@@ -1,0 +1,7 @@
+{
+  "real_qwen": true,
+  "first_preview_seconds": 7.082,
+  "preview": "Hello. This is a short voice note.",
+  "final_text": "Hello. This is a short voice note. Hello. This is a short voice note.",
+  "limits": "Synthetic English microphone on this CPU, not a latency promise or natural Hindi/Hinglish test."
+}

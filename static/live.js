@@ -1,25 +1,20 @@
 const $ = (id) => document.getElementById(id);
 const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition = null;
-let generation = 0;
-if (!Recognition) {
-  $("live-enabled").disabled = true;
-  $("live-status").textContent =
-    "Live draft is unavailable in this browser. Recording and final transcription still work.";
-}
+let recognition,
+  generation = 0;
 function stop() {
   generation++;
   recognition?.abort();
   recognition = null;
 }
 document.addEventListener("vani:phase", (event) => {
-  $("live-enabled").disabled = !Recognition || event.detail !== "idle";
   if (event.detail !== "recording") {
     stop();
     return;
   }
   $("live-draft").textContent = "";
-  if (!$("live-enabled").checked || !Recognition) return;
+  document.body.dataset.browserLive = "waiting";
+  if (!Recognition) return;
   const id = ++generation;
   recognition = new Recognition();
   recognition.continuous = true;
@@ -27,37 +22,36 @@ document.addEventListener("vani:phase", (event) => {
   recognition.lang = $("language").value === "hi" ? "hi-IN" : "en-IN";
   recognition.onresult = (event) => {
     if (id !== generation) return;
+    document.body.dataset.browserLive = "working";
     $("live-draft").textContent = Array.from(
       event.results,
       (result) => result[0].transcript,
     ).join(" ");
+    $("live-status").textContent = "Live preview";
+    $("live-draft").scrollTop = $("live-draft").scrollHeight;
   };
-  recognition.onerror = () => {
-    if (id === generation)
-      $("live-status").textContent =
-        "Live draft could not continue. Keep speaking; Qwen will transcribe after Stop.";
+  const fallback = () => {
+    if (id === generation) {
+      document.body.dataset.browserLive = "failed";
+      $("live-status").textContent = "Connecting live text...";
+    }
   };
-  recognition.onend = () => {
-    if (id === generation)
-      $("live-status").textContent =
-        "Browser live session ended. Qwen transcription is still available after Stop.";
-  };
+  recognition.onerror = fallback;
+  recognition.onend = fallback;
   try {
     recognition.start();
-    $("live-status").textContent =
-      "Live draft — provisional words may change. Mixed-language accuracy varies.";
+    $("live-status").textContent = "Listening...";
   } catch {
     stop();
-    $("live-status").textContent =
-      "Live draft unavailable. Recording continues normally.";
+    document.body.dataset.browserLive = "failed";
   }
 });
 document.addEventListener("vani:route", () => {
   stop();
   $("live-draft").textContent = "";
+  $("live-status").textContent = "";
 });
 document.addEventListener("vani:result", () => {
   $("live-draft").textContent = "";
-  if (Recognition)
-    $("live-status").textContent = "Final Qwen transcript is ready.";
+  $("live-status").textContent = "";
 });

@@ -163,10 +163,15 @@ async function remoteTranscribe(settings, blob, filename, language, token) {
 }
 
 async function transcribeAudio(blob, filename, language) {
-  if (!blob.size)
-    return say("This recording is empty. Try recording again.", "error");
-  if (blob.size > MAX_BYTES)
-    return say("Keep recordings under 10 MB and five minutes.", "error");
+  if (!blob.size || blob.size > MAX_BYTES) {
+    setPhase("idle");
+    return say(
+      !blob.size
+        ? "This recording is empty. Try recording again."
+        : "Keep recordings under 10 MB and five minutes.",
+      "error",
+    );
+  }
   const token = ++generation;
   setPhase("processing");
   $("retry").hidden = true;
@@ -380,6 +385,14 @@ async function startRecording() {
           ? "ogg"
           : "webm";
       rememberAudio(blob, `recording.${extension}`);
+      setPhase("processing");
+      say("Finishing your text…", "busy");
+      const live = { wait: [] };
+      document.dispatchEvent(
+        new CustomEvent("vani:finish-live", { detail: live }),
+      );
+      await Promise.allSettled(live.wait);
+      if (token !== generation) return;
       await transcribeAudio(blob, lastAudio.filename, lastAudio.language);
     };
     stream.getAudioTracks().forEach((track) =>
@@ -400,6 +413,9 @@ async function startRecording() {
     }, session.seconds * 1000);
     resetTimer();
     setPhase("recording");
+    document.dispatchEvent(
+      new CustomEvent("vani:capture", { detail: { stream } }),
+    );
     say("Recording now. Speak naturally, then choose Stop & transcribe.");
   } catch (error) {
     stream?.getTracks().forEach((track) => track.stop());
@@ -485,7 +501,7 @@ const info = {
     "YOUR VOICE. YOUR CHOICE.",
     [
       "Recording begins only after you press Start recording and allow microphone access. You can cancel at any time.",
-      "When you stop, the audio is sent to the transcription server for transcription.",
+      "Recording starts only when you press Start recording. Live preview may use your browser's speech provider; Qwen preview sends short audio sections to the configured transcription server. The final pass uses the recording after Stop.",
       "The app does not deliberately save transcript history or add recordings to a database. Uploads can exist temporarily on the server. Hosting providers may keep operational logs and apply their own policies.",
       "Your editable text stays in this page until you close or refresh it. Copy anything you want to keep. Do not submit sensitive recordings to a public demo.",
     ],
@@ -593,3 +609,5 @@ updateEditor();
 import("./studio.js");
 import("./writing.js");
 import("./live.js");
+import("./qwen-live.js");
+import("./interface.js");

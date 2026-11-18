@@ -49,7 +49,6 @@ const assert = require("node:assert/strict");
         document.getElementById("writing-output").value ===
         "Build a study planner.",
     );
-    await p.locator("#live-enabled").check();
     await p.evaluate(() => {
       document.dispatchEvent(
         new CustomEvent("vani:phase", { detail: "recording" }),

@@ -35,6 +35,49 @@
       </nav>
     </header>
 
+    <aside
+      id="feature-card"
+      class="feature-card"
+      hidden
+      aria-label="About Vani"
+    >
+      <div class="feature-controls">
+        <button
+          id="card-expand"
+          aria-label="Expand feature card"
+          aria-expanded="false"
+        >
+          Expand</button
+        ><button id="card-close" aria-label="Close feature card">Close</button>
+      </div>
+      <button
+        id="card-flip"
+        class="card-flip"
+        aria-pressed="false"
+        aria-label="Flip Vani feature card"
+      >
+        <span class="card-face card-front"
+          ><img src="./assets/penguin-poster.png" alt="" /><strong lang="hi"
+            >वाणी</strong
+          ><span>Your voice, in words.</span
+          ><span class="card-hint">Flip to explore</span></span
+        >
+        <span class="card-face card-back"
+          ><strong>Make room for your voice.</strong
+          ><span>• Timed topic practice</span
+          ><span>• Live text while recording</span
+          ><span>• Edit and copy transcripts</span
+          ><span>• Replay and save your voice</span
+          ><span>• Delivery score and retry</span
+          ><span>• Turn ideas into AI prompts</span
+          ><span class="card-hint"
+            >Live previews may lag. Browser speech can use its provider. Final
+            Qwen text follows Stop. AI tools send text only on click.</span
+          ></span
+        >
+      </button>
+    </aside>
+    <button id="card-open" class="card-open" hidden>About Vani</button>
     <main id="main">
       <section id="home-view" class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
@@ -137,6 +180,26 @@
             <p id="prompt" hidden></p>
           </div>
         </section>
+        <section
+          id="writing-tools"
+          class="writing-tools"
+          aria-label="Use your text"
+        >
+          <h2>Speak an idea. Get a useful prompt.</h2>
+          <button id="make-prompt" class="button primary">
+            Turn into a prompt
+          </button>
+          <button id="clean-text" class="button">Clean up text</button>
+          <p class="recording-note">Uses Gemini; keeps your original.</p>
+          <p id="writing-status" role="status"></p>
+          <textarea
+            id="writing-output"
+            aria-label="AI writing suggestion"
+            readonly
+            hidden
+          ></textarea>
+          <button id="copy-writing" class="button" hidden>Copy result</button>
+        </section>
         <div class="workspace-grid">
           <aside class="capture-panel">
             <label for="language">Language</label>
@@ -156,21 +219,15 @@
                 Cancel
               </button>
             </div>
-            <label class="live-option"
-              ><input id="live-enabled" type="checkbox" /> Live draft (browser
-              service)</label
-            >
-            <p class="recording-note">
-              Optional: audio may go to your browser’s speech provider. Final
-              text comes from Qwen after Stop.
-            </p>
             <p id="live-status" role="status"></p>
             <p id="live-draft" aria-label="Live draft"></p>
             <div class="record-meta">
               <span id="record-state">Ready when you are.</span
               ><output id="timer" aria-label="Recording duration">00:00</output>
             </div>
-            <p class="limits">Your words appear after you stop.</p>
+            <p class="limits">
+              Live preview · <a href="#privacy">Speech privacy</a>
+            </p>
             <div id="recording-review" class="recording-review" hidden>
               <p>Listen to your recording</p>
               <audio
@@ -218,28 +275,6 @@
         <div id="status" class="status-line" role="status" aria-live="polite">
           Nothing is recording yet. Your microphone turns on only when you ask.
         </div>
-        <section
-          id="writing-tools"
-          class="writing-tools"
-          aria-label="Use your text"
-        >
-          <h2>Put your words to work.</h2>
-          <button id="make-prompt" class="button primary">
-            Turn into a prompt
-          </button>
-          <button id="clean-text" class="button">Clean up text</button>
-          <p class="recording-note">
-            On click, sends your text to Gemini. Your original stays unchanged.
-          </p>
-          <p id="writing-status" role="status"></p>
-          <textarea
-            id="writing-output"
-            aria-label="AI writing suggestion"
-            readonly
-            hidden
-          ></textarea>
-          <button id="copy-writing" class="button" hidden>Copy result</button>
-        </section>
         <section
           id="practice-result"
           class="practice-result"
