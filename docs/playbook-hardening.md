@@ -100,3 +100,13 @@ The UI removes the Live checkbox and verbose provider text; Speech privacy and a
 27 Python tests, score helpers, feature tests, card interaction/mobile checks, recording baseline and accelerated timers pass. Hosted ZeroGPU/Cloudflare documentation was rechecked; free accounts meeting eligibility can host up to two ZeroGPU Spaces, with visitor queues/daily quotas. Deployment guide now includes Space Secrets and mandatory live-preview acceptance tests. Public domain/Space deployment remains unperformed.
 
 Stop/admission regression: tests/live-admission.cjs injects queued preview sections while one mocked ASR call is active, stops recording, and verifies queued previews are discarded and final ASR starts only after that active call completes (two calls total, maximum concurrency one).
+
+## Workspace-first identity and playback revision
+
+Workspace/launcher comes before Practice; transcript controls precede writing tools. Practice logic is unchanged. Both flip-card faces now expose the same six features, explicit click-to-flip guidance and inverse black/white colors, with only X dismissal and Warning / Info restoration. Landing also shows the card below its hero. User-selected Om replaces the round face identity in header/card/favicon using the existing font. No Sanskrit recognition is claimed.
+
+The penguin's 12.28-second clip was converted into a forward/reverse loop at its original 25 fps to avoid an abrupt reset; no new frames or higher-frame-rate claim. Original local media backup remains in ignored tmp, and supplied references are untouched. Visible Play/Pause icon/text and aria-pressed follow real play/pause events; failed playback updates actual state, errors are labeled, and reduced-motion disables autoplay.
+
+The two-tab reduced-motion regression uncovered a real startup issue: uvicorn logged repeated Exceeded concurrency limit warnings, and the second tab had default HTML controls, no loaded video and no running UI scripts. Local HTTP admission was 8, insufficient for parallel static assets/media in multiple tabs. Both launch scripts now use a bounded 32 HTTP connections; Qwen's one-inference admission and localhost binding remain unchanged. After restarting the verified idle local server, the same two-tab playback/reduced-motion check passed. This is a static-loading fix, not a user-capacity/SLO claim.
+
+Brand/media UI, matching-face/X/reopen/mobile checks, separate-draft Practice checks, recording/copy baseline, timer checks, launcher and 27 Python tests pass. No new real AI request or language-accuracy test was performed for this visual/media change.

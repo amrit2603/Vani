@@ -18,3 +18,5 @@ Browser API reference: [MDN MediaRecorder](https://developer.mozilla.org/en-US/d
 ## Flip-card interaction reference
 
 The user supplied a React Bits FlipCard example and source as a visual/interaction reference. The application uses an original vanilla HTML/CSS/JavaScript implementation of click-to-flip, expand, dismiss and entry/exit motion; it does not bundle that React/Motion component or its dependencies. Existing fonts and penguin media notices above remain applicable.
+
+The user's later branding instruction selects the Om (ॐ) character from their supplied image. The implementation renders it with the existing Devanagari font; the devotional image itself is not redistributed. The penguin asset is now a forward/reverse version of the previously supplied/cropped video, retaining its original 25-fps motion and existing provenance.

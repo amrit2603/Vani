@@ -18,20 +18,11 @@
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
       <a class="brand" href="#home" aria-label="Vani home">
-        <svg viewBox="0 0 28 28" aria-hidden="true">
-          <path
-            fill="currentColor"
-            d="M7 2h14v2h3v3h2v14h-2v3h-3v2H7v-2H4v-3H2V7h2V4h3z"
-          />
-          <path
-            fill="var(--paper)"
-            d="M8 11h2v2H8zm10 0h2v2h-2zm-7 5h6v2h-6z"
-          />
-        </svg>
+        <span class="om-mark" aria-hidden="true">ॐ</span>
         <span class="workspace-brand" hidden>Vani</span>
       </a>
       <nav aria-label="Main navigation">
-        <a href="#practice">Practice</a><a href="#dictate">Workspace</a>
+        <a href="#dictate">Workspace</a><a href="#practice">Practice</a>
       </nav>
     </header>
 
@@ -42,42 +33,60 @@
       aria-label="About Vani"
     >
       <div class="feature-controls">
-        <button
-          id="card-expand"
-          aria-label="Expand feature card"
-          aria-expanded="false"
-        >
-          Expand</button
-        ><button id="card-close" aria-label="Close feature card">Close</button>
+        <span class="card-warning">Warning / Info</span
+        ><button id="card-close" aria-label="Close feature card">
+          <svg viewBox="0 0 20 20" aria-hidden="true">
+            <path d="m5 5 10 10M15 5 5 15" />
+          </svg>
+        </button>
       </div>
       <button
         id="card-flip"
         class="card-flip"
         aria-pressed="false"
-        aria-label="Flip Vani feature card"
+        aria-label="Vani features: live transcription, editing, AI prompt builder, text cleanup, timed practice, replay and score. Click to flip the theme."
       >
         <span class="card-face card-front"
-          ><img src="./assets/penguin-poster.png" alt="" /><strong lang="hi"
-            >वाणी</strong
-          ><span>Your voice, in words.</span
-          ><span class="card-hint">Flip to explore</span></span
-        >
-        <span class="card-face card-back"
-          ><strong>Make room for your voice.</strong
-          ><span>• Timed topic practice</span
-          ><span>• Live text while recording</span
-          ><span>• Edit and copy transcripts</span
-          ><span>• Replay and save your voice</span
-          ><span>• Delivery score and retry</span
-          ><span>• Turn ideas into AI prompts</span
-          ><span class="card-hint"
-            >Live previews may lag. Browser speech can use its provider. Final
-            Qwen text follows Stop. AI tools send text only on click.</span
+          ><span class="card-heading"
+            ><span class="om-mark" aria-hidden="true">ॐ</span
+            ><strong lang="hi">वाणी</strong></span
+          ><span class="card-tagline">Your voice, in words.</span
+          ><span class="card-features"
+            ><span>Live transcription</span><span>Edit &amp; copy text</span
+            ><span>AI prompt builder</span><span>Clean up writing</span
+            ><span>Timed speaking practice</span
+            ><span>Replay &amp; score</span></span
+          ><span class="card-hint">Click this card to flip its theme ↔</span
+          ><span class="card-note"
+            >Preview may lag. Speech uses browser/Qwen services. AI tools send
+            text only on click.</span
+          ></span
+        ><span class="card-face card-back"
+          ><span class="card-heading"
+            ><span class="om-mark" aria-hidden="true">ॐ</span
+            ><strong lang="hi">वाणी</strong></span
+          ><span class="card-tagline">Your voice, in words.</span
+          ><span class="card-features"
+            ><span>Live transcription</span><span>Edit &amp; copy text</span
+            ><span>AI prompt builder</span><span>Clean up writing</span
+            ><span>Timed speaking practice</span
+            ><span>Replay &amp; score</span></span
+          ><span class="card-hint">Click this card to flip its theme ↔</span
+          ><span class="card-note"
+            >Preview may lag. Speech uses browser/Qwen services. AI tools send
+            text only on click.</span
           ></span
         >
       </button>
     </aside>
-    <button id="card-open" class="card-open" hidden>About Vani</button>
+    <button
+      id="card-open"
+      class="card-open"
+      aria-controls="feature-card"
+      aria-expanded="true"
+    >
+      Warning / Info
+    </button>
     <main id="main">
       <section id="home-view" class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
@@ -118,6 +127,7 @@
             id="penguin"
             autoplay
             loop
+            preload="auto"
             muted
             playsinline
             poster="./assets/penguin-poster.png"
@@ -131,9 +141,9 @@
           aria-label="Pause penguin animation"
           title="Pause animation"
         >
-          <svg viewBox="0 0 20 20" aria-hidden="true">
-            <path d="M7 5v10m6-10v10" />
-          </svg>
+          <svg id="motion-icon" viewBox="0 0 20 20" aria-hidden="true">
+            <path d="M7 5v10m6-10v10" /></svg
+          ><span id="motion-label">Pause animation</span>
         </button>
       </section>
 
@@ -179,26 +189,6 @@
             </p>
             <p id="prompt" hidden></p>
           </div>
-        </section>
-        <section
-          id="writing-tools"
-          class="writing-tools"
-          aria-label="Use your text"
-        >
-          <h2>Speak an idea. Get a useful prompt.</h2>
-          <button id="make-prompt" class="button primary">
-            Turn into a prompt
-          </button>
-          <button id="clean-text" class="button">Clean up text</button>
-          <p class="recording-note">Uses Gemini; keeps your original.</p>
-          <p id="writing-status" role="status"></p>
-          <textarea
-            id="writing-output"
-            aria-label="AI writing suggestion"
-            readonly
-            hidden
-          ></textarea>
-          <button id="copy-writing" class="button" hidden>Copy result</button>
         </section>
         <div class="workspace-grid">
           <aside class="capture-panel">
@@ -275,6 +265,26 @@
         <div id="status" class="status-line" role="status" aria-live="polite">
           Nothing is recording yet. Your microphone turns on only when you ask.
         </div>
+        <section
+          id="writing-tools"
+          class="writing-tools"
+          aria-label="Use your text"
+        >
+          <h2>Speak an idea. Get a useful prompt.</h2>
+          <button id="make-prompt" class="button primary">
+            Turn into a prompt
+          </button>
+          <button id="clean-text" class="button">Clean up text</button>
+          <p class="recording-note">Uses Gemini; keeps your original.</p>
+          <p id="writing-status" role="status"></p>
+          <textarea
+            id="writing-output"
+            aria-label="AI writing suggestion"
+            readonly
+            hidden
+          ></textarea>
+          <button id="copy-writing" class="button" hidden>Copy result</button>
+        </section>
         <section
           id="practice-result"
           class="practice-result"

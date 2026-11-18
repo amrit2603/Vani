@@ -1,0 +1,15 @@
+{
+  "original": {
+    "frames": 307,
+    "fps": 25.0,
+    "duration": 12.28,
+    "boundary_mean_absolute_pixel_change": 14.1833
+  },
+  "loop": {
+    "frames": 612,
+    "fps": 25.0,
+    "duration": 24.48,
+    "boundary_mean_absolute_pixel_change": 4.0915
+  },
+  "method": "Forward/reverse loop, original frame rate retained. Endpoint pixel delta is a mechanical check, not perceptual certification."
+}

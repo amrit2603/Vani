@@ -16,3 +16,5 @@ Authority: the user's 1440 × 662, 12.28-second preview video, sampled at one-se
 - Practice-first centered navigation. Large monochrome delivery score with visible formula, observed next steps and comparable-attempt change. Live provisional text is distinct from the final editor; writing suggestions stay separate from source. Both nav choices remain visible on mobile.
 
 - Compact automatic preview, moving black navigation pill and original CSS flip card inspired by the supplied React Bits example. Desktop reserves space beside the workspace; small screens put the card in document flow. Close persists until reopened during the page session. Reduced motion disables flip/nav transitions. Prompt tools precede the editor.
+
+- Latest layout: Workspace first, dictation/editor before writing tools. Om brand mark from the user's explicit symbol brief, original pale-blue ground, inverse black/white feature-card faces with matching feature tiles. X-only dismissal, Warning / Info restore. Landing features sit below the original hero. A visible labeled Play/Pause tracks actual media state; penguin loop is forward/reverse at the original frame rate.

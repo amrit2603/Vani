@@ -23,7 +23,7 @@ if (-not (Test-Vani)) {
     New-Item -ItemType Directory -Force -Path $logs | Out-Null
     $server = Start-Process -FilePath $python -ArgumentList @(
         '-m', 'uvicorn', 'app:app', '--host', '127.0.0.1', '--port', $Port,
-        '--workers', '1', '--limit-concurrency', '8', '--timeout-keep-alive', '5', '--no-access-log'
+        '--workers', '1', '--limit-concurrency', '32', '--timeout-keep-alive', '5', '--no-access-log'
     ) -WorkingDirectory $PSScriptRoot -WindowStyle Hidden -PassThru `
       -RedirectStandardOutput (Join-Path $logs "server-$Port.out.log") `
       -RedirectStandardError (Join-Path $logs "server-$Port.err.log")
@@ -36,4 +36,4 @@ if (-not (Test-Vani)) {
     if (-not $ready) { throw "Vani is not responding yet. See .cache\server-$Port.err.log, then try again." }
 }
 Write-Host "Vani is ready: $url"
-if (-not $NoBrowser) { Start-Process -FilePath "$url/#practice" }
+if (-not $NoBrowser) { Start-Process -FilePath "$url/#dictate" }

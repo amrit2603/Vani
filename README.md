@@ -6,7 +6,7 @@ Standalone local Hindi, English, and Hinglish dictation powered by Qwen3-ASR. MI
 
 **Two simple rooms:** Workspace for dictation, editing and copying. Practice for Speak on a Topic / Read Aloud with 2/3/5-minute sessions, New topic / New passage, a countdown with automatic stop, visible transcript, recording playback/download, concise feedback, same-topic retry and optional Gemini coaching. No setup wizard, batch uploads or advanced tool panels. See [scope, setup and limitations](docs/practice-release.md). The original appearance and animated landing are retained.
 
-**Open on this computer:** double-click **Open Vani.cmd** in D:\Vani. It starts the local server if needed, waits for it to respond, and opens Practice in your default browser. Keep microphone permission enabled. Do not open static/index.html directly. Startup errors appear in the command window; server logs are in .cache.
+**Open on this computer:** double-click **Open Vani.cmd** in D:\Vani. It starts the local server if needed, waits for it to respond, and opens Workspace in your default browser. Keep microphone permission enabled. Do not open static/index.html directly. Startup errors appear in the command window; server logs are in .cache.
 
 The local address is <http://127.0.0.1:8787/#dictate>. Browser-flow checks cover recording, cancellation, clipboard, retries, audio playback/download and mobile layout; actual ASR checks are recorded separately. The intended public site is **vani.amritkumar.dev**, with a separate **shubhamsingh123/vani-speech** ZeroGPU service. These are deployment targets, not claimed live URLs. Follow [the verified free deployment plan](docs/free-deployment.md).
 
@@ -70,10 +70,16 @@ Recording automatically starts live text; there is no separate Live checkbox. Mi
 
 This is segmented live preview, not native token-by-token Qwen streaming. A real synthetic English microphone test showed the first Qwen preview before Stop in 7.082 seconds on this machine (docs/live-qwen-evidence.json). This single result is not a speed or multilingual accuracy guarantee. Free shared GPU hosting can queue or exhaust quota, especially with repeated preview calls. Browser speech may use its provider; the Speech privacy link and feature card explain this compactly.
 
-Practice and Workspace have a moving black navigation indicator. A Vani/penguin feature card appears in both rooms, flips on click, expands and stays until closed. Closing it persists across rooms for this page session; About Vani reopens it. The supplied React Bits reference inspired an original vanilla CSS/JS implementation; React and Motion were not added. Turn into a prompt and Clean up text are featured above the editor and send text to Gemini only on click, retaining the original.
+Workspace comes first, followed by Practice, with a moving black navigation indicator. A Vani/penguin feature card appears in both rooms, shows the same features on both faces, flips between black/white themes and stays until closed with X. Closing it persists across rooms for this page session; Warning / Info reopens it. The supplied React Bits reference inspired an original vanilla CSS/JS implementation; React and Motion were not added. Language, recording and transcript come first; Turn into a prompt and Clean up text follow the editor and send text to Gemini only on click, retaining the original.
 
 The experimental delivery rubric remains completion 40, recognized pace 30 and quiet-time continuity 30; it is not a certified communication or pronunciation grade. Comparable retries show percentage-point and relative change, not daily progress. Optional AI coaching discusses content and possible wording issues.
 
 Deployment walkthrough: [free-deployment.md](docs/free-deployment.md). Build packages with .venv/Scripts/python.exe prepare_release.py, deploy dist/space to your own ZeroGPU Space, deploy dist/web to Cloudflare Pages, then associate vani.amritkumar.dev and add its CNAME at your DNS provider. No public deployment is claimed yet.
 
 Checks: node tests/interface.cjs, node tests/live-fallback.cjs, node tests/features.cjs, node tests/score.mjs plus the baseline suites. The default live fallback test uses real microphone capture with mocked inference. The optional VANI_REAL_ASR=1 test uses tmp/demo.wav and real Qwen; recordings stay ignored. Physical microphone, natural Hindi/Hinglish, long-session performance and actual hosted streaming still require verification.
+
+## Current brand and animation
+
+The supplied naming image now informs an Om (ॐ) brand mark in the header, feature card and favicon, rendered using the established Devanagari font. This is a symbol treatment, not a claim of Sanskrit speech recognition. The original pale-blue video palette remains. The feature card also appears below the landing hero; both faces show features immediately, with a visible flip instruction. No Expand/Shrink controls.
+
+The penguin media retains the supplied animation at 25 fps, with a forward/reverse loop to avoid the abrupt end-to-start cut. Play/Pause has a visible label, changing icon and aria-pressed state synchronized with real media events. Reduced-motion disables autoplay. Browser checks cover both actual pause/time freeze and resumed playback, including a second reduced-motion tab.

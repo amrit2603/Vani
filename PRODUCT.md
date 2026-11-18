@@ -52,8 +52,12 @@ Workspace and Practice are centered main navigation choices. No onboarding, pers
 
 ## Latest approved extension
 
-Practice is first in navigation and launcher. Recording automatically starts browser preview, falling back to bounded four-second Qwen audio sections. Full-recording final transcription remains available after Stop. Support/privacy information is compact. Transparent experimental delivery score and same-session retry comparison are separate from semantic AI coaching. Workspace exposes prompt creation and cleanup as explicit Gemini actions, leaving source text intact. Native Qwen streaming, pronunciation grading and daily progress storage are not implemented.
+Workspace is first in navigation and launcher. Recording automatically starts browser preview, falling back to bounded four-second Qwen audio sections. Full-recording final transcription remains available after Stop. Support/privacy information is compact. Transparent experimental delivery score and same-session retry comparison are separate from semantic AI coaching. Workspace exposes prompt creation and cleanup as explicit Gemini actions, leaving source text intact. Native Qwen streaming, pronunciation grading and daily progress storage are not implemented.
 
 ## Compact interface update
 
 Preserve landing design. Use a sliding black active tab and a dismissible/expandable Vani feature card on both rooms, inspired by the supplied FlipCard reference without changing the framework. Feature prompt tools above the editor. No separate live checkbox; microphone still starts only with Start recording. Native token streaming is not claimed.
+
+## Latest requested layout and identity
+
+Workspace first, Practice second. Language/recording/transcript precede prompt and cleanup tools. Keep Practice behavior unchanged. Front and back of the feature card show the same features and an explicit click-to-flip instruction in inverse black/white themes. Only X dismisses; Warning / Info reopens. Include the card below the landing hero. User explicitly selected the Om mark from the supplied name reference for Vani branding, replacing the round face/penguin card identity. Preserve reference pale-blue palette. Smooth the penguin loop and make real playback state obvious.

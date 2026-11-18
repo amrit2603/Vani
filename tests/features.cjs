@@ -33,7 +33,7 @@ const assert = require("node:assert/strict");
     await p.waitForFunction(
       () => document.getElementById("make-prompt").onclick,
     );
-    assert.equal(await p.locator("nav a").first().textContent(), "Practice");
+    assert.equal(await p.locator("nav a").first().textContent(), "Workspace");
     await p.locator("#transcript").fill("Build a study planner");
     await p.locator("#make-prompt").click();
     await p.waitForFunction(() =>

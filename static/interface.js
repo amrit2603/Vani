@@ -1,40 +1,44 @@
 const $ = (id) => document.getElementById(id);
-const card = $("feature-card");
+const card = $("feature-card"),
+  nav = document.querySelector("nav");
 let dismissed = false;
-const nav = document.querySelector("nav");
-const dot = document.createElement("span");
-dot.className = "nav-indicator";
-dot.setAttribute("aria-hidden", "true");
-nav.prepend(dot);
+const indicator = document.createElement("span");
+indicator.className = "nav-indicator";
+indicator.setAttribute("aria-hidden", "true");
+nav.prepend(indicator);
 function position() {
   const active = nav.querySelector('[aria-current="page"]');
-  dot.hidden = !active;
+  indicator.hidden = !active;
   if (active) {
-    dot.style.width = `${active.offsetWidth}px`;
-    dot.style.transform = `translateX(${active.offsetLeft}px)`;
+    indicator.style.width = `${active.offsetWidth}px`;
+    indicator.style.transform = `translateX(${active.offsetLeft}px)`;
   }
 }
-document.addEventListener("vani:route", (event) => {
+function render(page) {
   position();
-  const room = ["dictate", "practice"].includes(event.detail);
-  card.hidden = !room || dismissed;
-  document.body.classList.toggle("has-feature-card", room && !dismissed);
-  $("card-open").hidden = !room || !dismissed;
-  if (
-    room &&
-    !dismissed &&
-    !matchMedia("(prefers-reduced-motion: reduce)").matches
-  )
+  const available = ["home", "dictate", "practice"].includes(page);
+  document.body.classList.toggle("is-home", page === "home");
+  if (page === "home") $("home-view").after(card);
+  else $("main").before(card);
+  card.hidden = !available || dismissed;
+  document.body.classList.toggle(
+    "has-feature-card",
+    available && !dismissed && page !== "home",
+  );
+  $("card-open").hidden = !available || !dismissed;
+  $("card-open").setAttribute("aria-expanded", String(!card.hidden));
+  if (!card.hidden && !matchMedia("(prefers-reduced-motion: reduce)").matches)
     card.animate(
       [
-        { opacity: 0, transform: "translateY(16px)" },
+        { opacity: 0, transform: "translateY(12px)" },
         { opacity: 1, transform: "translateY(0)" },
       ],
-      { duration: 350, easing: "ease-out" },
+      { duration: 280, easing: "ease-out" },
     );
-});
+}
+document.addEventListener("vani:route", (event) => render(event.detail));
 window.addEventListener("resize", position);
-position();
+document.fonts.ready.then(position);
 $("card-flip").onclick = () => {
   const flipped = card.classList.toggle("flipped");
   $("card-flip").setAttribute("aria-pressed", String(flipped));
@@ -45,37 +49,22 @@ $("card-flip").onclick = () => {
     .querySelector(".card-back")
     .setAttribute("aria-hidden", String(!flipped));
 };
-$("card-expand").onclick = () => {
-  const expanded = card.classList.toggle("expanded");
-  document.body.classList.toggle("card-expanded", expanded);
-  $("card-expand").setAttribute("aria-expanded", String(expanded));
-  $("card-expand").textContent = expanded ? "Shrink" : "Expand";
-};
 $("card-close").onclick = async () => {
   dismissed = true;
-  const anim = matchMedia("(prefers-reduced-motion: reduce)").matches
+  const animation = matchMedia("(prefers-reduced-motion: reduce)").matches
     ? null
     : card.animate(
-        [
-          { opacity: 1, transform: "translateX(0)" },
-          { opacity: 0, transform: "translateX(24px)" },
-        ],
-        { duration: 180 },
+        [{ opacity: 1 }, { opacity: 0, transform: "translateY(12px)" }],
+        { duration: 160 },
       );
-  await anim?.finished;
-  card.hidden = true;
-  document.body.classList.remove("has-feature-card");
-  $("card-open").hidden = false;
+  await animation?.finished;
+  render(location.hash.slice(1) || "home");
   $("card-open").focus();
 };
 $("card-open").onclick = () => {
   dismissed = false;
-  card.hidden = false;
-  document.body.classList.add("has-feature-card");
-  $("card-open").hidden = true;
+  render(location.hash.slice(1) || "home");
   $("card-flip").focus();
 };
-const initial = location.hash.slice(1);
-card.hidden = !["practice", "dictate"].includes(initial);
-document.body.classList.toggle("has-feature-card", !card.hidden);
 card.querySelector(".card-back").setAttribute("aria-hidden", "true");
+render(location.hash.slice(1) || "home");

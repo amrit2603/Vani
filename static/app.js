@@ -591,19 +591,41 @@ window.addEventListener("beforeunload", (event) => {
 });
 
 const penguin = $("penguin");
-function motion(paused) {
-  if (paused) penguin.pause();
-  else penguin.play().catch(() => {});
+function updateMotion() {
+  const paused = penguin.paused;
   $("motion-toggle").setAttribute(
     "aria-label",
     paused ? "Play penguin animation" : "Pause penguin animation",
   );
   $("motion-toggle").title = paused ? "Play animation" : "Pause animation";
+  $("motion-toggle").setAttribute("aria-pressed", String(!paused));
+  $("motion-label").textContent = paused ? "Play animation" : "Pause animation";
+  $("motion-icon").innerHTML = paused
+    ? '<path d="m7 4 9 6-9 6z"/>'
+    : '<path d="M7 5v10m6-10v10"/>';
 }
+function motion(paused) {
+  if (paused) penguin.pause();
+  else
+    penguin.play().catch(() => {
+      updateMotion();
+    });
+  updateMotion();
+}
+penguin.addEventListener("play", updateMotion);
+penguin.addEventListener("pause", updateMotion);
+penguin.addEventListener("error", () => {
+  $("motion-label").textContent = "Animation unavailable";
+  $("motion-toggle").disabled = true;
+});
 $("motion-toggle").addEventListener("click", () => motion(!penguin.paused));
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
-if (reducedMotion.matches) motion(true);
+if (reducedMotion.matches) {
+  penguin.autoplay = false;
+  motion(true);
+}
 reducedMotion.addEventListener("change", (event) => motion(event.matches));
+updateMotion();
 route();
 updateEditor();
 import("./studio.js");

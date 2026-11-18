@@ -19,12 +19,11 @@ const assert = require("node:assert/strict");
       await p.locator("#card-flip").getAttribute("aria-pressed"),
       "true",
     );
-    await p.locator("#card-expand").click();
+    assert.equal(await p.locator("#card-expand").count(), 0);
     assert.equal(
-      await p.locator("#card-expand").getAttribute("aria-expanded"),
-      "true",
+      await p.locator(".card-front .card-features").textContent(),
+      await p.locator(".card-back .card-features").textContent(),
     );
-    await p.locator("#card-expand").click();
     await p.evaluate(() => document.activeElement.blur());
     await p.waitForTimeout(750);
     await p.screenshot({
@@ -38,7 +37,7 @@ const assert = require("node:assert/strict");
     assert.equal(await p.locator("#feature-card").isVisible(), false);
     const featured = await p.locator("#writing-tools").boundingBox(),
       editor = await p.locator(".workspace-grid").boundingBox();
-    assert.ok(featured.y < editor.y);
+    assert.ok(featured.y > editor.y + editor.height);
     await p.locator("#card-open").click();
     await p.setViewportSize({ width: 390, height: 844 });
     assert.equal(
@@ -56,7 +55,7 @@ const assert = require("node:assert/strict");
     await p.waitForTimeout(750);
     await p.screenshot({ path: "tmp/qa/card-mobile.png", fullPage: true });
     console.log(
-      "Card flip/expand/dismiss/reopen, route persistence, featured writing and mobile layout passed.",
+      "Matching two-theme card, X dismissal/reopen, route persistence, transcription-first order and mobile layout passed.",
     );
   } finally {
     await b.close();
