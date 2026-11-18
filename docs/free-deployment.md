@@ -1,5 +1,10 @@
 # Free deployment — checked 18 November 2026
 
+Current deployment is a static-assets Worker at empty-dust-85c0.theamritkumar263.workers.dev, not Pages. The user selected an anonymous public demo: no visitor login, no embedded owner token, final Qwen requests subject to shared quotas. For this Worker use its Domains tab or Settings > Domains & Routes > Add > Custom Domain, only if amritkumar.dev is an active zone in the same Cloudflare account. Do not use the Pages CNAME instructions below for a workers.dev hostname. If DNS is still external, decide between a deliberate DNS-zone migration (preserving every portfolio/mail record) or a separate Pages deployment supporting an external subdomain CNAME. Do not change nameservers without that decision.
+
+Source: [Workers Custom Domains prerequisites](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/).
+
+
 | Resource | Role | Free boundary |
 | --- | --- | --- |
 | Cloudflare Pages | Static website at vani.amritkumar.dev | Free plan: custom domains, 500 builds/month, 25 MiB maximum asset size. Existing domain renewal is separate. |

@@ -6,6 +6,20 @@ export function words(text) {
       .match(/[\p{L}\p{M}\p{N}]+/gu) || []
   );
 }
+export function transcriptionError(message) {
+  if (/quota|runs limit/i.test(message || "")) {
+    const wait = message.match(/try again in (\d{1,2}:\d{2}:\d{2})/i);
+    return (
+      "Free demo usage limit reached. Your recording and existing text are safe. Save your recording and try transcription later." +
+      (wait ? ` The service reports a wait of ${wait[1]}.` : "") +
+      " No automatic retry was made."
+    );
+  }
+  return (
+    message ||
+    "Cannot reach the transcription service. Check your connection, then retry."
+  );
+}
 export function deliveryScore(metrics, target) {
   if (metrics.seconds < 10 || metrics.words < 10) return null;
   const completion = Math.round(40 * Math.min(1, metrics.seconds / target));

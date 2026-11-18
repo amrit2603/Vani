@@ -1,4 +1,4 @@
-import { decode, wav } from "./speech-tools.mjs";
+import { decode, wav, transcriptionError } from "./speech-tools.mjs";
 const $ = (id) => document.getElementById(id);
 const transcript = $("transcript");
 const record = $("record");
@@ -295,11 +295,7 @@ async function transcribeAudio(blob, filename, language) {
   } catch (error) {
     if (token !== generation) return;
     if (error.name !== "AbortError")
-      say(
-        error.message ||
-          "Cannot reach the transcription service. Check your connection, then retry.",
-        "error",
-      );
+      say(transcriptionError(error.message), "error");
   } finally {
     clearTimeout(deadline);
     if (token === generation) {
