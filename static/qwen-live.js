@@ -1,42 +1,9 @@
 import { wav } from "./speech-tools.mjs";
 const $ = (id) => document.getElementById(id);
 let session;
-let client;
 async function send(samples, language) {
   const signal = AbortSignal.timeout(310000);
-  const bounded = (promise) =>
-    signal.aborted
-      ? Promise.reject(new Error("Live request timed out"))
-      : Promise.race([
-          promise,
-          new Promise((_, reject) =>
-            signal.addEventListener(
-              "abort",
-              () => reject(new Error("Live request timed out")),
-              { once: true },
-            ),
-          ),
-        ]);
-  const config = await (await fetch("./config.json", { signal })).json();
   const blob = wav(samples);
-  if (config.space) {
-    const { Client, handle_file } = await bounded(
-      import("https://cdn.jsdelivr.net/npm/@gradio/client@2.8.0/dist/index.min.js"),
-    );
-    signal.throwIfAborted();
-    client ||= await bounded(Client.connect(config.space));
-    signal.throwIfAborted();
-    return (
-      await bounded(
-        client.predict("/transcribe", {
-          audio: handle_file(
-            new File([blob], "live.wav", { type: "audio/wav" }),
-          ),
-          language,
-        }),
-      )
-    ).data[0];
-  }
   const body = new FormData();
   body.append("audio", blob, "live.wav");
   body.append("language", language);
@@ -66,6 +33,16 @@ document.addEventListener("vani:capture", async (event) => {
   };
   session = current;
   try {
+    const config = await (
+      await fetch("./config.json", { signal: AbortSignal.timeout(10000) })
+    ).json();
+    if (current.closed) return;
+    if (config.space) {
+      // Shared hosted GPU runs are reserved for final transcription, not recurring previews.
+      if (document.body.dataset.browserLive !== "working")
+        $("live-status").textContent = "Listening; final text after Stop.";
+      return;
+    }
     const context = new AudioContext({ sampleRate: 16000 });
     current.context = context;
     await context.audioWorklet.addModule("./pcm-worklet.js");

@@ -83,3 +83,7 @@ Checks: node tests/interface.cjs, node tests/live-fallback.cjs, node tests/featu
 The supplied naming image now informs an Om (ॐ) brand mark in the header, feature card and favicon, rendered using the established Devanagari font. This is a symbol treatment, not a claim of Sanskrit speech recognition. The original pale-blue video palette remains. The landing card and Warning / Info are both hidden; both faces show features immediately, with a visible flip instruction. No Expand/Shrink controls.
 
 The penguin media retains the supplied animation at 25 fps, with a forward/reverse loop to avoid the abrupt end-to-start cut. Play/Pause has a visible label, changing icon and aria-pressed state synchronized with real media events. Reduced-motion disables autoplay. Browser checks cover both actual pause/time freeze and resumed playback, including a second reduced-motion tab.
+
+## Hosted quota behavior
+
+Hosted deployments now use browser-only live previews and reserve Qwen for final transcription after Stop. Automatic recurring hosted Qwen previews are disabled to conserve ZeroGPU runs. Local installations retain segmented Qwen previews. Browser-only live recognition is provider-dependent; current quota limits are not reset by this code change. Do not embed a Hugging Face account token in public frontend files.
