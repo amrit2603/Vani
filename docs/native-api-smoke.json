@@ -1,0 +1,13 @@
+{
+  "date": "2026-11-18",
+  "transport": "local Gradio named /transcribe API",
+  "wall_seconds": 6.033,
+  "result": {
+    "text": "Hello. This is a short voice note.",
+    "language": "English",
+    "audio_seconds": 4.069,
+    "inference_seconds": 5.765,
+    "model": "Qwen/Qwen3-ASR-0.6B-hf"
+  },
+  "limits": "Windows CPU with synthetic English audio; hosted ZeroGPU and natural multilingual accuracy remain unverified."
+}

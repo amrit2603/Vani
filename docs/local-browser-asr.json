@@ -1,0 +1,9 @@
+{
+  "date": "2026-11-18",
+  "backend": "real local compatibility Qwen3-ASR HTTP API",
+  "wall_seconds": 48.029,
+  "text": "Hello. This is a short voice note.",
+  "clipboard_matches": true,
+  "errors": [],
+  "limits": "Synthetic English upload; no physical microphone or natural multilingual accuracy test."
+}

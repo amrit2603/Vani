@@ -1,0 +1,14 @@
+{
+  "tests": [
+    "record-stop",
+    "clipboard",
+    "cancel-no-upload",
+    "failure-preserves-text",
+    "retry-appends",
+    "clear",
+    "navigation-stops-mic",
+    "mobile-no-overflow"
+  ],
+  "errors": [],
+  "limits": "Synthetic browser microphone with mocked transcription replies; real ASR is checked separately."
+}

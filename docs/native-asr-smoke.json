@@ -1,0 +1,10 @@
+{
+  "date": "2026-11-18",
+  "runtime": "Python 3.12.12 / Transformers 5.23.0 / PyTorch 2.13.0 on Windows CPU",
+  "model": "Qwen/Qwen3-ASR-0.6B-hf",
+  "fixture": "locally synthesized English voice note, not committed",
+  "text": "Hello. This is a short voice note.",
+  "audio_seconds": 4.069,
+  "inference_seconds": 19.167,
+  "limits": "CPU function call, not a hosted GPU measurement or natural multilingual accuracy test. First-use imports and weight downloads are excluded from inference_seconds. A deprecated sampling-rate keyword warning was subsequently removed; samples are already resampled to the model's default 16 kHz."
+}

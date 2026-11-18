@@ -1,0 +1,7 @@
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+  Permissions-Policy: microphone=(self), camera=(), geolocation=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self'; connect-src 'self' https://huggingface.co https://*.hf.space wss://*.hf.space; media-src 'self' blob:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'
+  Cache-Control: no-cache

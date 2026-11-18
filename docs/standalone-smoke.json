@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-18",
+  "fixture": "existing documented synthetic English clip; not copied or committed",
+  "invalid_audio_status": 422,
+  "measurements": [
+    {
+      "hint": "en",
+      "wall_seconds": 185.313,
+      "text": "Print the receipt.",
+      "language": "English",
+      "audio_seconds": 2.099,
+      "inference_seconds": 7.823,
+      "model": "Qwen/Qwen3-ASR-0.6B"
+    },
+    {
+      "hint": "auto",
+      "wall_seconds": 10.606,
+      "text": "Print the receipt.",
+      "language": "English",
+      "audio_seconds": 2.099,
+      "inference_seconds": 10.457,
+      "model": "Qwen/Qwen3-ASR-0.6B"
+    }
+  ],
+  "limits": "Single synthetic English clip; no natural Hindi/Hinglish or physical microphone/browser verification."
+}

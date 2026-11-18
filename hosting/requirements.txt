@@ -1,0 +1,10 @@
+gradio==6.32.0
+spaces==0.52.1
+transformers==5.23.0
+torch==2.13.0
+accelerate==1.16.0
+av==16.1.0
+numpy==2.5.4
+librosa==1.0.1
+soundfile==0.14.0
+pillow==13.0.0
