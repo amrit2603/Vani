@@ -34,12 +34,10 @@ const assert = require("node:assert/strict");
     await p.locator("#feature-card").waitFor({ state: "hidden" });
     await p.getByRole("link", { name: "Workspace", exact: true }).click();
     await p.locator("#writing-tools").waitFor({ state: "visible" });
-    assert.equal(await p.locator("#feature-card").isVisible(), true);
+    assert.equal(await p.locator("#feature-card").isVisible(), false);
     const featured = await p.locator("#writing-tools").boundingBox(),
       editor = await p.locator(".workspace-grid").boundingBox();
     assert.ok(featured.y > editor.y + editor.height);
-    await p.locator("#card-close").click();
-    await p.locator("#feature-card").waitFor({ state: "hidden" });
     await p.locator("#card-open").click();
     await p.setViewportSize({ width: 390, height: 844 });
     assert.equal(

@@ -65,3 +65,7 @@ Workspace first, Practice second. Language/recording/transcript precede prompt a
 ## Latest card placement correction
 
 No feature card on the initial landing page. Keep Warning / Info below Play/Pause; it leads into Workspace and shows the card. On entering either Workspace or Practice, slide the card from the right into a fixed top-right overlay, including on mobile. Do not move, shrink or push down the workspace. X dismisses the current room card, Warning / Info reopens it, and entering the other room shows its card again.
+
+## Final once-per-session correction
+
+Remove both card and Warning / Info from landing. On first entry into either room, show the card once per tab session using only a sessionStorage boolean. No repeated automatic display after topic generation, recording, route changes or reload. Manual in-room Info can reopen it. Place the card below the top introductory text, toward middle-right, without changing workspace bounds.

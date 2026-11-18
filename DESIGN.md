@@ -20,3 +20,5 @@ Authority: the user's 1440 × 662, 12.28-second preview video, sampled at one-se
 - Latest layout: Workspace first, dictation/editor before writing tools. Om brand mark from the user's explicit symbol brief, original pale-blue ground, inverse black/white feature-card faces with matching feature tiles. X-only dismissal, Warning / Info restore. Landing features sit below the original hero. A visible labeled Play/Pause tracks actual media state; penguin loop is forward/reverse at the original frame rate.
 
 - Final placement: hide the landing card, retain the help trigger beneath playback. Room cards are fixed top-right overlays on every viewport, with rightward entry/exit and no content reflow or reserved sidebar. New room entry reveals the card; X dismisses it until reopened or changing rooms.
+
+- Current placement supersedes the top-right rule: top clamp(160px,22dvh,240px), right 16px. Landing has no card/help control. Reveal automatically once per tab session; animate only an actual hidden-to-visible transition. Keep manual Info in rooms only.

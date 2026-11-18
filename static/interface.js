@@ -1,7 +1,11 @@
 const $ = (id) => document.getElementById(id);
 const card = $("feature-card"),
   nav = document.querySelector("nav");
-let dismissed = false;
+let automaticShown = false,
+  opened = false;
+try {
+  automaticShown = sessionStorage.getItem("vani-info-seen") === "1";
+} catch {}
 const indicator = document.createElement("span");
 indicator.className = "nav-indicator";
 indicator.setAttribute("aria-hidden", "true");
@@ -18,19 +22,32 @@ let pageName = null,
   revision = 0;
 function render(page) {
   revision++;
-  if (page !== pageName) dismissed = false;
+  const changed = page !== pageName;
   pageName = page;
   position();
   const room = ["dictate", "practice"].includes(page);
   document.body.classList.toggle("is-home", page === "home");
   document.body.classList.remove("has-feature-card");
   $("main").before(card);
-  if (page === "home") $("home-view").append($("card-open"));
-  else card.after($("card-open"));
-  card.hidden = !room || dismissed;
-  $("card-open").hidden = page !== "home" && (!room || !dismissed);
+  card.after($("card-open"));
+  const wasHidden = card.hidden;
+  if (changed) {
+    opened = room && !automaticShown;
+    if (opened) {
+      automaticShown = true;
+      try {
+        sessionStorage.setItem("vani-info-seen", "1");
+      } catch {}
+    }
+  }
+  card.hidden = !room || !opened;
+  $("card-open").hidden = !room || opened;
   $("card-open").setAttribute("aria-expanded", String(!card.hidden));
-  if (!card.hidden && !matchMedia("(prefers-reduced-motion: reduce)").matches)
+  if (
+    wasHidden &&
+    !card.hidden &&
+    !matchMedia("(prefers-reduced-motion: reduce)").matches
+  )
     card.animate(
       [
         { opacity: 0, transform: "translateX(calc(100% + 24px))" },
@@ -53,7 +70,7 @@ $("card-flip").onclick = () => {
     .setAttribute("aria-hidden", String(!flipped));
 };
 $("card-close").onclick = async () => {
-  dismissed = true;
+  opened = false;
   const version = revision;
   const animation = matchMedia("(prefers-reduced-motion: reduce)").matches
     ? null
@@ -70,11 +87,8 @@ $("card-close").onclick = async () => {
   $("card-open").focus();
 };
 $("card-open").onclick = () => {
-  if (pageName === "home") {
-    location.hash = "dictate";
-    return;
-  }
-  dismissed = false;
+  if (!["dictate", "practice"].includes(pageName)) return;
+  opened = true;
   render(pageName);
   $("card-flip").focus();
 };

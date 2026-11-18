@@ -698,3 +698,15 @@
 .is-home .motion-toggle {
   bottom: 62px;
 }
+
+.feature-card {
+  --info-top: clamp(160px, 22dvh, 240px);
+  top: var(--info-top);
+  max-height: calc(100dvh - var(--info-top) - 16px);
+}
+.card-flip {
+  height: min(450px, calc(100dvh - var(--info-top) - 64px));
+}
+.is-home .motion-toggle {
+  bottom: 13px;
+}
