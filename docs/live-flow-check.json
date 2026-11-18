@@ -1,6 +1,6 @@
 {
   "real_qwen": false,
-  "first_preview_seconds": 4.365,
+  "first_preview_seconds": 4.397,
   "preview": "Hello this is a useful voice note.",
   "final_text": "Hello this is a useful voice note.",
   "limits": "Real AudioWorklet capture with mocked ASR replies."

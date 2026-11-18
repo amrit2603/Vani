@@ -1,89 +1,122 @@
 # Vani — वाणी
 
-Standalone local Hindi, English, and Hinglish dictation powered by Qwen3-ASR. MIT-licensed application code; model weights and dependencies retain their own licenses. This is an independent project, not affiliated with Wispr Flow or OpenAI Whisper.
+**Your voice, in words.** An open-source Hindi, English and Hinglish dictation app with a separate speaking-practice workspace.
 
-**Your voice, in words.** The video-inspired landing page and recording workspace are implemented: record, stop, transcribe, edit and copy. No visitor installation or model download. The project is independent of NILE's workflows.
+**[Open the live app → vani.amritkumar.dev](https://vani.amritkumar.dev/)**
 
-**Two simple rooms:** Workspace for dictation, editing and copying. Practice for Speak on a Topic / Read Aloud with 2/3/5-minute sessions, New topic / New passage, a countdown with automatic stop, visible transcript, recording playback/download, concise feedback, same-topic retry and optional Gemini coaching. No setup wizard, batch uploads or advanced tool panels. See [scope, setup and limitations](docs/practice-release.md). The original appearance and animated landing are retained.
+[Workspace](https://vani.amritkumar.dev/#dictate) · [Practice](https://vani.amritkumar.dev/#practice) · [Speech service](https://huggingface.co/spaces/shubhamsingh123/vani-speech) · [Source](https://github.com/amrit2603/Vani)
 
-**Open on this computer:** double-click **Open Vani.cmd** in D:\Vani. It starts the local server if needed, waits for it to respond, and opens Workspace in your default browser. Keep microphone permission enabled. Do not open static/index.html directly. Startup errors appear in the command window; server logs are in .cache.
-
-The local address is <http://127.0.0.1:8787/#dictate>. Browser-flow checks cover recording, cancellation, clipboard, retries, audio playback/download and mobile layout; actual ASR checks are recorded separately. The intended public site is **vani.amritkumar.dev**, with a separate **shubhamsingh123/vani-speech** ZeroGPU service. These are deployment targets, not claimed live URLs. Follow [the verified free deployment plan](docs/free-deployment.md).
+The public demo needs no account, installation or model download. It uses shared Hugging Face ZeroGPU inference, so transcription and Practice can temporarily stop when usage/run limits are reached. A custom domain does not remove those limits. This is a working demo project, not an unlimited or always-available speech service.
 
 ![Vani landing page](docs/screenshots/vani-landing.png)
 
-Create upload packages with `.\.venv\Scripts\python.exe prepare_release.py`: `dist/web`, `dist/space`, `dist/vani-website.zip` and `dist/vani-space.zip`. Public speech uses the separate native Transformers runtime in `hosting/requirements.txt`; do not expose the legacy local API publicly. Free hosted inference has queues and daily quotas.
+## What you can do
 
-Optional browser checks: `npm.cmd install --prefix tmp/qa playwright`, then `node tests/browser.cjs` and `node tests/simple-ui.cjs` against the running local server. These use a synthetic microphone and mocked ASR replies; see docs for separate real-model results.
+| Area | Features |
+| --- | --- |
+| Dictation | Choose Hindi, English or mixed-language detection; record, stop, review, edit and copy the transcript. Record again to append text. |
+| Live preview | Provisional browser speech text while recording, where supported. Qwen generates the final transcript after Stop. |
+| Writing tools | Turn a rough spoken idea into a reusable AI prompt, or clean up repetitions and punctuation. Results stay separate from the original text and can be copied. |
+| Practice | Speak on a randomly selected topic or read an authored passage aloud. Choose a 2-, 3- or 5-minute session with countdown and automatic stop. New topics/passages appear only on click. |
+| Feedback | Recording duration, estimated recognized words/minute, quiet intervals, a large delivery score with its formula, read-aloud reference agreement and same-topic retry comparison. |
+| Coaching | Optional Gemini feedback on what was said, structure, relevance and possible wording issues, with suggestions for the next attempt. |
+| Recording review | Listen to your latest recording and download it to keep a copy. Workspace and Practice maintain separate drafts and latest clips while the page is open. |
+| Interface | Responsive pale-blue workspace, Om identity, animated penguin with labeled Play/Pause, reduced-motion support and an optional black/white flip feature card. The card appears automatically only once per tab session and can be dismissed or reopened manually. |
 
-Timer/decode boundaries: `node tests/practice-timer.cjs` (accelerated stop timers, verified 120/180/300-second deadlines). Launcher cold-start/reuse: `powershell -ExecutionPolicy Bypass -File tests/launcher.ps1` (requires unused port 8788). Fresh real-model recording, playback and clipboard evidence: [recording-e2e.json](docs/recording-e2e.json).
+## Try it
 
-## Local setup (Windows)
+1. Open [Workspace](https://vani.amritkumar.dev/#dictate), choose a language and press **Start recording**. Allow microphone access.
+2. Speak, then press **Stop & transcribe**. Review the result before editing or copying it.
+3. Use **Turn into a prompt** or **Clean up text** when useful. Clicking either sends that text to Gemini; the original stays unchanged.
+4. For practice, open [Practice](https://vani.amritkumar.dev/#practice), choose a mode/duration, click **New topic** or **New passage**, then record. Review the transcript, playback and feedback, or retry the same topic.
 
-Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then in PowerShell:
+If the demo reaches its free usage limit, save the recording and try later. Failed transcription preserves existing text and offers a manual retry; requests are not automatically retried. Signing into Hugging Face in another tab does not automatically authenticate this anonymous website.
+
+## How it works
+
+```mermaid
+flowchart LR
+    A[Browser on Cloudflare Pages] -->|Recording after Stop| B[Hugging Face ZeroGPU: Qwen3-ASR]
+    B -->|Final text| A
+    A -->|Explicit writing or coaching action| C[Space helper: Gemini]
+    C -->|Suggestion| A
+```
+
+- **Frontend:** plain HTML/CSS/JavaScript, with no Node build step. Hosted on Cloudflare Pages at `vani.amritkumar.dev`; the Pages address is [vani-amrit.pages.dev](https://vani-amrit.pages.dev/).
+- **Public speech backend:** the project's own [Gradio Space](https://huggingface.co/spaces/shubhamsingh123/vani-speech), using the native Transformers `Qwen/Qwen3-ASR-0.6B-hf` checkpoint on ZeroGPU.
+- **Local backend:** FastAPI/Pydantic with the approved `qwen-asr` compatibility runtime and `Qwen/Qwen3-ASR-0.6B`, running on CPU and bound to localhost.
+- **Optional AI:** bounded server-side Gemini requests through httpx. Keys belong in local `.env` or Space Secrets, never frontend files.
+
+Hosted live preview uses the browser speech service only; recurring hosted Qwen previews are disabled to conserve GPU runs. Local mode also supports four-second PCM/Qwen preview sections. Neither mode claims native word-by-word Qwen streaming. Preview text can change, lag or be unavailable; browser speech may use its provider and mixed-language support varies.
+
+## Understand the feedback
+
+The **Delivery score / 100** is an experimental rubric: session completion **40**, recognized pace **30** (target 100–180 words/minute), and time outside amplitude-based quiet intervals **30**. At least ten seconds and ten recognized words are required. The UI shows the breakdown and observable suggestions.
+
+Read Aloud also compares recognized words with the passage. Comparable retries use the same topic, mode and duration to show percentage-point and relative score change. They are session comparisons, not a daily progress tracker.
+
+These estimates do not certify speaking ability, pronunciation, confidence, grammar or topic accuracy. Recognition errors, microphone noise and deliberate pauses can affect them. Optional content coaching is an AI suggestion to review, not a verified grade. Speaker labels, pronunciation grading and native streaming are not implemented.
+
+## Run locally on Windows
+
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then use PowerShell:
 
 ```powershell
-cd D:\Vani
+git clone https://github.com/amrit2603/Vani.git
+cd Vani
 powershell -ExecutionPolicy Bypass -File .\setup.ps1
 powershell -ExecutionPolicy Bypass -File .\open.ps1
 ```
 
-For a foreground server you can stop with Ctrl+C, run start.ps1 instead. The double-click launcher runs the server in the background; it does not install a service or start on Windows boot.
+After setup, double-click [Open Vani.cmd](Open%20Vani.cmd) to start/reuse the local server and open Workspace. Do not open `static/index.html` directly. For the existing checkout, the launcher is `D:\Vani\Open Vani.cmd`.
 
-The server binds only to `127.0.0.1:8787`. API documentation: <http://127.0.0.1:8787/api/docs>. The first transcription downloads Qwen3-ASR-0.6B from Hugging Face into the user's model cache unless already available; allow disk space, RAM, internet access, and extra startup time. Subsequent transcriptions reuse the worker/model. No API key or paid transcription service is needed.
+Local app: http://127.0.0.1:8787/ · API docs: http://127.0.0.1:8787/api/docs
 
-Python 3.14 is used by this Windows setup. Other Python versions/platforms have not been validated. Use one server worker: each additional worker would load another model and bypass the per-process admission limit.
+The first local transcription downloads the model into the user cache unless already present and needs disk space, memory and internet access. CPU inference can be slower than real time; no paid transcription API key is needed. This Windows setup uses Python 3.14; other platforms/versions are not validated. Use one server worker.
+
+The launcher runs a background server, without installing a service or Windows startup task. Use `start.ps1` for a foreground server stopped with Ctrl+C. Startup logs are in `.cache`.
+
+For Gemini, copy [.env.example](.env.example) to `.env` and configure your own `GEMINI_API_KEY` and `GEMINI_MODEL`. The key is optional for speech transcription. Existing request spacing, per-process admission/daily limits and timeouts apply; provider free-tier eligibility and billing depend on your Google project. No automatic AI calls, retries or plan changes are made.
+
+## Privacy and limits
+
+- Recording starts only on **Start recording**. Speech goes to the configured server; browser preview may additionally use the browser provider. AI tools send text/context to Gemini only on click.
+- Browser recordings are limited to five minutes / 10 MB and sent as bounded 30-second final-transcription sections. Direct API/Space uploads retain a two-minute / 10 MB limit. Longer recordings need multiple inference calls and consume more shared quota.
+- No account system, automatic persistent transcript/audio history, task execution or outbound messaging. Provider logs and temporary upload storage may still exist; this is not a forensic-erasure guarantee.
+- Copy or download anything to keep before refreshing/closing. New recordings replace that room's latest clip. A sessionStorage boolean remembers whether the information card was shown.
+- Local decoding/inference uses a bounded subprocess deadline and one-inference admission. Canceling a browser request does not instantly terminate an already-started server job. Health checks report liveness, not model readiness.
+- **Known upstream dependency advisories remain in the local compatibility runtime.** Do not expose that local API publicly. See [hardening evidence](docs/playbook-hardening.md) and [separate deployment runtime](hosting/requirements.txt); no zero-vulnerability or production-capacity claim is made.
+- Hindi may be returned in Devanagari; Romanized Hinglish output and language accuracy are not guaranteed. Om branding does not imply Sanskrit transcription support.
+
+## Deploy and maintain
+
+The frontend is deployed at **https://vani.amritkumar.dev/**. Its public configuration points to `shubhamsingh123/vani-speech`. Use [the deployment guide](docs/free-deployment.md) for Space hardware, Secrets, Pages uploads and subdomain DNS. Existing portfolio records are separate.
+
+To export the current application:
 
 ```powershell
-curl.exe -F "audio=@sample.wav" -F "language=hi-en" http://127.0.0.1:8787/api/transcribe
+.\.venv\Scripts\python.exe prepare_release.py --space shubhamsingh123/vani-speech
 ```
 
-`language` is `auto` (default), `en`, `hi`, or `hi-en`. Mixed speech uses model auto-detection, without forcing a single language or translating. The model may emit Hindi in Devanagari; Romanized Hinglish output is not guaranteed. Output text is never executed as a command.
+This creates `dist/web`, `dist/space`, `dist/vani-website.zip` and `dist/vani-space.zip`. Upload only those prepared public files. Generated frontend config targets the Space; local `static/config.json` intentionally stays in local mode. Secrets, caches, user recordings, model weights and environments are excluded from Git/release exports.
 
-## Limits and privacy
+## Verification
 
-- Browser recordings: up to five minutes / 10 MB, split into bounded 30-second requests. Direct API uploads: 10 MB / 120 seconds. One active transcription; concurrent attempts receive 429 with Retry-After.
-- Decoding and inference run in a reusable subprocess with a five-minute deadline. A timeout terminates and resets that process.
-- Uploaded files are closed and no audio/transcript history is deliberately retained. Multipart uploads may spool to OS temporary storage while being parsed, then are closed; this is not a forensic erasure guarantee.
-- Health checks report API liveness, not model readiness. First-request time includes model loading.
-- Local host validation, same-origin upload checks, no-store replies, and restrictive browser headers are enabled.
-- CPU operation is supported; realtime latency is not promised. This implementation has no GPU mode.
+Public HTML, app script and Space configuration were checked on **18 November 2026**: [deployment check](docs/live-deployment-check.json). A user-supplied hosted Space result confirmed transcription of a 9.24-second recording with 1.544 seconds of model inference; this excludes upload/queue time and is not a latency promise. Anonymous website requests have also hit ZeroGPU limits, so uninterrupted availability is not claimed.
 
-## Development checks
+Local evidence includes 28 Python tests, Node metric/score checks, synthetic browser recording/playback/clipboard/error/retry checks, quota handling, hosted-preview suppression, card/session behavior, responsive layouts and actual animation Play/Pause. Browser suites generally mock inference/AI; real-model evidence is labeled separately in [the playbook](docs/playbook-hardening.md). Natural multilingual accuracy, broad hardware/browser compatibility and concurrent-user capacity have not been certified.
 
 ```powershell
-uv pip install --python .venv\Scripts\python.exe -r requirements-dev.txt
+uv pip install --python .venv/Scripts/python.exe -r requirements-dev.txt
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
+node tests/speech-tools.mjs
+node tests/score.mjs
+node tests/quota-message.mjs
 uv tool run --from ruff ruff check .
-uv tool run --from pip-audit pip-audit --path .venv/Lib/site-packages
 ```
 
-See [verification and limitations](docs/playbook-hardening.md), [deployment notes](docs/deployment.md), and [third-party notices](THIRD_PARTY_NOTICES.md). Known upstream ML dependency advisories remain in the **local compatibility runtime**; do not expose that API publicly. The separate native hosting runtime has its own audit and deployment checks.
+Optional browser checks require a running local server and `npm.cmd install --prefix tmp/qa playwright`. Run `node tests/browser.cjs`, `node tests/overlay.cjs` and `node tests/hosted-quota.cjs`; scripts default to Windows Edge. Full evidence and additional checks are linked in the playbook.
 
-## Source repository
+## License and credits
 
-Published source: [amrit2603/Vani](https://github.com/amrit2603/Vani). This project is separate from NILE. Recordings, model weights, caches, virtual environments and secrets stay out of Git. The supplied penguin animation is an intentional application asset with separate provenance, not a user voice recording. Public source publication does not mean the hosted website or inference service has been deployed.
-
-## Live text, compact interface and deployment
-
-Recording automatically starts live text; there is no separate Live checkbox. Microphone access still starts only after Start recording. Browser speech gives provisional updates when available. Otherwise an AudioWorklet captures four-second mono sections at 16 kHz and sends them to the configured Qwen service, one at a time. When processing falls behind, only three queued preview sections are retained; the full recording is kept for the final pass. Preview gaps, cut words and corrections are possible. Stop waits for an active preview request before the final pass to avoid competing for inference admission. Requests have a 310-second bound; the server retains its own deadline. Cancellation closes capture and discards stale updates but does not instantly terminate an already-running server inference.
-
-This is segmented live preview, not native token-by-token Qwen streaming. A real synthetic English microphone test showed the first Qwen preview before Stop in 7.082 seconds on this machine (docs/live-qwen-evidence.json). This single result is not a speed or multilingual accuracy guarantee. Free shared GPU hosting can queue or exhaust quota, especially with repeated preview calls. Browser speech may use its provider; the Speech privacy link and feature card explain this compactly.
-
-Workspace comes first, followed by Practice, with a moving black navigation indicator. A Vani/penguin feature card appears in both rooms, slides in from the right to a fixed middle-right overlay, shows the same features on both faces, flips between black/white themes and stays until closed with X. It opens automatically only once per tab session; X closes it and the in-room Info button reopens it manually. Topic generation, recording, navigation and reload do not auto-show it again. The supplied React Bits reference inspired an original vanilla CSS/JS implementation; React and Motion were not added. Language, recording and transcript come first; Turn into a prompt and Clean up text follow the editor and send text to Gemini only on click, retaining the original.
-
-The experimental delivery rubric remains completion 40, recognized pace 30 and quiet-time continuity 30; it is not a certified communication or pronunciation grade. Comparable retries show percentage-point and relative change, not daily progress. Optional AI coaching discusses content and possible wording issues.
-
-Deployment walkthrough: [free-deployment.md](docs/free-deployment.md). Build packages with .venv/Scripts/python.exe prepare_release.py, deploy dist/space to your own ZeroGPU Space, deploy dist/web to Cloudflare Pages, then associate vani.amritkumar.dev and add its CNAME at your DNS provider. No public deployment is claimed yet.
-
-Checks: node tests/interface.cjs, node tests/live-fallback.cjs, node tests/features.cjs, node tests/score.mjs plus the baseline suites. The default live fallback test uses real microphone capture with mocked inference. The optional VANI_REAL_ASR=1 test uses tmp/demo.wav and real Qwen; recordings stay ignored. Physical microphone, natural Hindi/Hinglish, long-session performance and actual hosted streaming still require verification.
-
-## Current brand and animation
-
-The supplied naming image now informs an Om (ॐ) brand mark in the header, feature card and favicon, rendered using the established Devanagari font. This is a symbol treatment, not a claim of Sanskrit speech recognition. The original pale-blue video palette remains. The landing card and Warning / Info are both hidden; both faces show features immediately, with a visible flip instruction. No Expand/Shrink controls.
-
-The penguin media retains the supplied animation at 25 fps, with a forward/reverse loop to avoid the abrupt end-to-start cut. Play/Pause has a visible label, changing icon and aria-pressed state synchronized with real media events. Reduced-motion disables autoplay. Browser checks cover both actual pause/time freeze and resumed playback, including a second reduced-motion tab.
-
-## Hosted quota behavior
-
-Hosted deployments now use browser-only live previews and reserve Qwen for final transcription after Stop. Automatic recurring hosted Qwen previews are disabled to conserve ZeroGPU runs. Local installations retain segmented Qwen previews. Browser-only live recognition is provider-dependent; current quota limits are not reset by this code change. Do not embed a Hugging Face account token in public frontend files.
+Original application code is [MIT licensed](LICENSE). Model weights, fonts, media and dependencies retain their own licenses and provenance; see [third-party notices](THIRD_PARTY_NOTICES.md). This is an independent project, not affiliated with Wispr Flow or OpenAI Whisper, and separate from NILE Instinct AI's workflows.

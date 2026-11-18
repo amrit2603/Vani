@@ -1,0 +1,8 @@
+{
+  "date": "2026-11-18",
+  "website": "https://vani.amritkumar.dev/",
+  "html_available": true,
+  "app_script_available": true,
+  "configured_space": "shubhamsingh123/vani-speech",
+  "limits": "Public static HTTP checks only. No microphone, inference, quota recovery or AI request was tested."
+}
