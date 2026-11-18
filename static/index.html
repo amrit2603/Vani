@@ -11,6 +11,7 @@
     <title>Vani — Your voice, in words</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./studio.css" />
     <script type="module" src="./app.js"></script>
   </head>
   <body>
@@ -30,7 +31,7 @@
         <span class="workspace-brand" hidden>Vani</span>
       </a>
       <nav aria-label="Main navigation">
-        <a href="#dictate">The workspace</a>
+        <a href="#dictate">The workspace</a><a href="#practice">Practice</a>
         <a href="#how">How it works</a>
         <a href="#privacy">Privacy</a>
         <a href="#help">Help</a>
@@ -65,7 +66,10 @@
           </div>
         </div>
         <div class="hero-art" aria-hidden="true">
-          <div class="speech-bubble" data-impeccable-ignore="hard-offset-shadow">
+          <div
+            class="speech-bubble"
+            data-impeccable-ignore="hard-offset-shadow"
+          >
             Speak your mind.<br />I'll find the words.<span class="cursor"
               >▌</span
             >
@@ -103,6 +107,49 @@
           <a class="back-link" href="#home">← Back home</a
           ><span class="session-label">A fresh page for your thoughts.</span>
         </div>
+        <section
+          id="practice-panel"
+          class="practice-panel"
+          hidden
+          aria-label="Speaking practice"
+        >
+          <h2>ONE VOICE. A LITTLE PRACTICE.</h2>
+          <p>
+            Speak, listen, reflect, try again. Measurements are observations—not
+            an ability grade.
+          </p>
+          <div class="tool-row">
+            <label
+              >Mode
+              <select id="practice-mode">
+                <option value="topic">Speak on a topic</option>
+                <option value="read">Read aloud</option>
+              </select></label
+            ><label
+              >Category
+              <select id="category">
+                <option>Everyday</option>
+                <option>College</option>
+                <option>Technology</option>
+                <option>Interviews</option>
+              </select></label
+            ><label
+              >Session
+              <select id="duration">
+                <option value="120">2 minutes</option>
+                <option value="180">3 minutes</option>
+                <option value="300">5 minutes</option>
+              </select></label
+            ><button id="new-prompt" class="button">New prompt</button>
+          </div>
+          <label for="prompt">Your prompt / reference passage (editable)</label
+          ><textarea id="prompt" rows="4" maxlength="3000"></textarea>
+          <p id="practice-report" role="status">
+            Your report appears after transcription.
+          </p>
+          <button id="try-again" class="button">Try this prompt again</button>
+          <p id="comparison"></p>
+        </section>
         <div class="workspace-grid">
           <aside class="capture-panel">
             <h1 id="workspace-title">SPEAK.<br />WE'RE ALL<br />EARS.</h1>
@@ -142,7 +189,7 @@
                 accept="audio/*,.webm,.mp4,.m4a"
             /></label>
             <p class="limits">
-              Up to 2 minutes · 10 MB<br />Your transcript appears after you
+              Up to 5 minutes · 10 MB<br />Your transcript appears after you
               stop.
             </p>
             <audio
@@ -183,6 +230,133 @@
         <div id="status" class="status-line" role="status" aria-live="polite">
           Nothing is recording yet. Your microphone turns on only when you ask.
         </div>
+        <section class="studio-tools" aria-label="Transcript tools">
+          <h2>MAKE IT YOURS.</h2>
+          <div class="tool-row">
+            <label
+              >Clip start (seconds)<input
+                id="clip-start"
+                type="number"
+                min="0"
+                max="299"
+                value="0" /></label
+            ><label
+              >Clip end (blank = end)<input
+                id="clip-end"
+                type="number"
+                min="1"
+                max="300" /></label
+            ><button class="button" id="bookmark">Bookmark this moment</button
+            ><button class="button" id="undo-edit">Undo edit</button>
+          </div>
+          <div class="tool-row">
+            <label>Find<input id="find-word" maxlength="100" /></label
+            ><label
+              >Replace with<input id="replace-word" maxlength="100" /></label
+            ><button class="button" id="replace-all">Replace all</button>
+          </div>
+          <label for="glossary"
+            >Personal terms: wrong → correct, one per line (applied only when
+            you choose)</label
+          ><textarea
+            id="glossary"
+            rows="2"
+            maxlength="3000"
+            placeholder="vanny → Vani"
+          ></textarea
+          ><button id="apply-glossary" class="button">
+            Apply terms to transcript
+          </button>
+          <label
+            ><input type="checkbox" id="voice-edits" /> Interpret “new
+            paragraph” and “new line” in English dictation as formatting
+            commands.</label
+          >
+          <div class="tool-row">
+            <label
+              >Search this recording<input
+                id="search-recording"
+                type="search" /></label
+            ><button id="export-txt" class="button">Download TXT</button
+            ><button id="export-srt" class="button">Download SRT</button
+            ><button id="export-vtt" class="button">Download VTT</button
+            ><button id="export-bundle" class="button">
+              Download review bundle
+            </button>
+          </div>
+          <p>
+            Timing uses 30-second ASR chunks, not word alignment. Caption edits
+            below are separate from the main draft and cover the latest
+            recording.
+          </p>
+          <div id="timeline"></div>
+          <div id="bookmarks"></div>
+          <details>
+            <summary>Batch audio files</summary>
+            <p>
+              Up to five files, processed one at a time. Failures keep completed
+              results.
+            </p>
+            <input
+              id="batch-files"
+              type="file"
+              accept="audio/*"
+              multiple
+            /><button id="batch-start" class="button">Process batch</button
+            ><button id="batch-cancel" class="button">Stop batch</button>
+            <ol id="batch-status"></ol>
+          </details>
+          <details>
+            <summary>Optional private library and practice progress</summary>
+            <label
+              ><input type="checkbox" id="save-consent" /> Save text and
+              measurements on this device only. Audio is not saved.</label
+            >
+            <div class="tool-row">
+              <button id="save-note" class="button">Save this attempt</button
+              ><button id="delete-library" class="button">
+                Delete saved notes</button
+              ><input
+                id="library-search"
+                type="search"
+                placeholder="Search saved notes"
+              />
+            </div>
+            <div id="library"></div>
+          </details>
+          <details>
+            <summary>Optional Gemini writing and coaching</summary>
+            <p>
+              Only the text and prompt are sent to Gemini. Original text stays
+              unchanged. Outputs are suggestions to review.
+            </p>
+            <label
+              ><input id="ai-consent" type="checkbox" /> Send this text and
+              prompt to Gemini for this action.</label
+            >
+            <div class="tool-row">
+              <select id="ai-action" aria-label="AI action">
+                <option value="coach">Practice coaching</option>
+                <option value="clean">Clean up words</option>
+                <option value="message">Write a message</option>
+                <option value="update">Work update</option>
+                <option value="notes">Structured notes / action items</option>
+                <option value="translate">Translate</option></select
+              ><select id="ai-language" aria-label="AI output language">
+                <option>English</option>
+                <option>Hindi</option></select
+              ><button id="ai-run" class="button">Ask Gemini</button>
+            </div>
+            <p id="ai-status" role="status"></p>
+            <textarea
+              id="ai-output"
+              rows="7"
+              readonly
+              aria-label="AI draft"
+            ></textarea
+            ><button id="copy-ai" class="button">Copy AI draft</button>
+          </details>
+        </section>
         <div class="session-actions">
           <button id="retry" class="text-link" hidden>
             Try transcription again <span aria-hidden="true">↗</span></button

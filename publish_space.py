@@ -20,7 +20,7 @@ def main():
         raise SystemExit("That Space already exists. Choose an unused --space name; existing repositories are never overwritten.")
     api.create_repo(args.space, repo_type="space", space_sdk="gradio", space_hardware=SpaceHardware.ZERO_A10G, private=False)
     api.upload_folder(repo_id=args.space, repo_type="space", folder_path=output / "space",
-                      allow_patterns=["app.py", "audio.py", "requirements.txt", "README.md", "LICENSE"],
+                      allow_patterns=["app.py", "audio.py", "coaching.py", "requirements.txt", "README.md", "LICENSE"],
                       commit_message="Add Vani multilingual transcription demo")
     print(f"Created https://huggingface.co/spaces/{args.space}. Wait for its build and verify ZeroGPU before publishing the frontend.")
 

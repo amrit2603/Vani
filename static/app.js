@@ -1,3 +1,4 @@
+import { decode, wav } from "./speech-tools.mjs";
 const $ = (id) => document.getElementById(id);
 const transcript = $("transcript");
 const record = $("record");
@@ -55,6 +56,7 @@ function setPhase(next) {
           ? "Waiting for microphone access…"
           : "Ready when you are.";
   updateEditor();
+  document.dispatchEvent(new CustomEvent("vani:phase", { detail: next }));
 }
 
 async function config() {
@@ -158,42 +160,81 @@ async function transcribeAudio(blob, filename, language) {
         "error",
       );
     }
-  }, 315000);
+  }, 1600000);
   try {
     const settings = await ensureService();
+    const samples = await decode(blob);
+    const fullSeconds = samples.length / 16000;
+    const from = Number(document.getElementById("clip-start")?.value || 0);
+    const to = Number(
+      document.getElementById("clip-end")?.value || fullSeconds,
+    );
+    if (
+      !Number.isFinite(from) ||
+      !Number.isFinite(to) ||
+      from < 0 ||
+      to > fullSeconds + 0.1 ||
+      to <= from
+    )
+      throw new Error("Choose a valid clip range within the recording.");
+    const segments = [];
     let result;
-    if (settings.space) {
-      result = await remoteTranscribe(
-        settings,
-        blob,
-        filename,
-        language,
-        token,
-      );
-    } else {
-      const form = new FormData();
-      form.append("audio", blob, filename);
-      form.append("language", language);
-      const response = await fetch("./api/transcribe", {
-        method: "POST",
-        body: form,
-        signal: controller.signal,
-      });
-      const body = await response.json();
-      if (!response.ok)
-        throw new Error(
-          typeof body.detail === "string"
-            ? body.detail
-            : "The recording could not be transcribed. Try a shorter clip.",
+    for (let start = from; start < to; start += 30) {
+      if (token !== generation) return;
+      const end = Math.min(start + 30, to),
+        piece = wav(
+          samples.slice(Math.round(start * 16000), Math.round(end * 16000)),
         );
-      result = body;
+      say(
+        `Transcribing section ${segments.length + 1} of ${Math.ceil((to - from) / 30)}…`,
+        "busy",
+      );
+      if (settings.space)
+        result = await remoteTranscribe(
+          settings,
+          piece,
+          "section.wav",
+          language,
+          token,
+        );
+      else {
+        const form = new FormData();
+        form.append("audio", piece, "section.wav");
+        form.append("language", language);
+        const response = await fetch("./api/transcribe", {
+          method: "POST",
+          body: form,
+          signal: controller.signal,
+        });
+        const body = await response.json();
+        if (!response.ok)
+          throw new Error(
+            typeof body.detail === "string"
+              ? body.detail
+              : "Transcription failed.",
+          );
+        result = body;
+      }
+      if (!result || typeof result.text !== "string" || !result.text.trim())
+        throw new Error("No speech recognized in this section.");
+      segments.push({ start, end, text: result.text.trim() });
     }
+    result = {
+      ...result,
+      text: segments.map((s) => s.text).join(" "),
+      audio_seconds: to - from,
+    };
     if (token !== generation || timedOut) return;
     if (!result || typeof result.text !== "string" || !result.text.trim())
       throw new Error(
         "No speech was recognized. Try speaking a little closer to the microphone.",
       );
-    transcript.value = [transcript.value.trim(), result.text.trim()]
+    const draft = document.getElementById("voice-edits")?.checked
+      ? result.text
+          .replace(/\bnew paragraph\b[,.]?/gi, "\n\n")
+          .replace(/\bnew line\b[,.]?/gi, "\n")
+      : result.text;
+    transcript.value = [transcript.value.trim(), draft.trim()]
       .filter(Boolean)
       .join("\n\n");
     updateEditor();
@@ -205,6 +246,19 @@ async function transcribeAudio(blob, filename, language) {
       .join(" · ");
     say(
       "There you are. Your words are ready to edit and copy. Record again to add more.",
+    );
+    document.dispatchEvent(
+      new CustomEvent("vani:result", {
+        detail: {
+          result,
+          segments,
+          samples: samples.slice(
+            Math.round(from * 16000),
+            Math.round(to * 16000),
+          ),
+          from,
+        },
+      }),
     );
     transcript.focus();
     // A successful recording is not offered as a retry, avoiding duplicate paragraphs.
@@ -312,9 +366,14 @@ async function startRecording() {
         `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
     }, 250);
     // Stop just short of the server limit to allow for recorder scheduling jitter.
-    session.deadline = setTimeout(() => {
-      if (recorder.state === "recording") recorder.stop();
-    }, 119000);
+    session.deadline = setTimeout(
+      () => {
+        if (recorder.state === "recording") recorder.stop();
+      },
+      (location.hash === "#practice"
+        ? Number(document.getElementById("duration").value) - 1
+        : 299) * 1000,
+    );
     $("timer").textContent = "00:00";
     setPhase("recording");
     say("Recording now. Speak naturally, then choose Stop & transcribe.");
@@ -434,11 +493,13 @@ const info = {
 function route() {
   const page = location.hash.slice(1) || "home";
   if (phase === "recording" || phase === "requesting") {
-    if (page !== "dictate") cancel();
+    if (!["dictate", "practice"].includes(page)) cancel();
   }
   $("home-view").hidden =
-    page !== "home" && !(!info[page] && page !== "dictate");
-  $("dictate-view").hidden = page !== "dictate";
+    page !== "home" &&
+    !(!info[page] && !["dictate", "practice"].includes(page));
+  $("dictate-view").hidden = !["dictate", "practice"].includes(page);
+  document.getElementById("practice-panel").hidden = page !== "practice";
   $("info-view").hidden = !info[page];
   document.querySelector(".workspace-brand").hidden = page === "home";
   if (info[page]) {
@@ -476,5 +537,15 @@ $("motion-toggle").addEventListener("click", () => motion(!penguin.paused));
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 if (reducedMotion.matches) motion(true);
 reducedMotion.addEventListener("change", (event) => motion(event.matches));
+async function transcribeFile(blob, filename, language) {
+  if (phase !== "idle") return;
+  if (!blob.size || blob.size > MAX_BYTES)
+    return say("Choose nonempty audio under 10 MB.", "error");
+  rememberAudio(blob, filename);
+  lastAudio.language = language;
+  return transcribeAudio(blob, filename, language);
+}
+export { transcribeAudio, transcribeFile };
 route();
 updateEditor();
+import("./studio.js");

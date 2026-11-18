@@ -10,6 +10,7 @@ import torch
 from transformers import AutoModelForMultimodalLM, AutoProcessor
 
 from audio import MAX_BYTES, SAMPLE_RATE, decode_audio
+from coaching import assist
 
 MODEL_ID = "Qwen/Qwen3-ASR-0.6B-hf"
 LOG = logging.getLogger(__name__)
@@ -64,6 +65,25 @@ with gr.Blocks(title="Vani Speech", delete_cache=(60, 300)) as demo:
     button = gr.Button("Transcribe")
     output = gr.JSON(label="Transcript")
     button.click(transcribe, [audio_input, language_input], output, api_name="transcribe", concurrency_limit=1)
+    with gr.Accordion("Optional Gemini assistance", open=False):
+        ai_text = gr.Textbox(label="Transcript", max_lines=15)
+        ai_action = gr.Dropdown(["coach", "clean", "message", "update", "notes", "translate"], value="coach", label="Action")
+        ai_context = gr.Textbox(label="Practice prompt")
+        ai_language = gr.Dropdown(["English", "Hindi"], value="English", label="Output language")
+        ai_consent = gr.Checkbox(label="Send this text and prompt to Gemini", value=False)
+        ai_button = gr.Button("Ask Gemini")
+        ai_result = gr.JSON(label="AI suggestion")
+
+        def ai_request(text, action, context, language, consent):
+            if consent is not True:
+                raise gr.Error("Consent is required before sending text to Gemini.")
+            try:
+                return assist(text, action, context, language)
+            except (ValueError, RuntimeError) as exc:
+                raise gr.Error(str(exc)) from None
+
+        ai_button.click(ai_request, [ai_text, ai_action, ai_context, ai_language, ai_consent], ai_result,
+                        api_name="assist", concurrency_limit=1)
 
 if __name__ == "__main__":
     demo.queue(max_size=8, default_concurrency_limit=1).launch(max_file_size="10mb", show_error=False)

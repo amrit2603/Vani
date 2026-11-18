@@ -38,6 +38,10 @@ Confirmed name: Vani — वाणी. Tagline: "Your voice, in words." The user
 
 Visitors should not install software or download model weights. Keep inference on the server. User declined browser-model inference. Research selected a free static frontend plus an eligible Hugging Face ZeroGPU service, subject to queues and daily quotas; no always-fast or unlimited-free inference claim is permitted.
 
+## Approved practice extension
+
+Keep voice-to-text as the core; put Read Aloud and Topic Speaking in a separate Practice section with the established UI. User approved optional Gemini using a server-side key and consent. Implemented scope and evidence are in docs/practice-release.md. The user explicitly deferred speaker labels, pronunciation grading and live draft transcription pending a separate model/requirements proposal.
+
 ## Evidence on Hand
 
 Existing NILE transcription implementation and documented CPU observations. Fresh standalone checks are recorded under docs/playbook-hardening.md. No natural multilingual accuracy corpus was supplied.

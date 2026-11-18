@@ -8,6 +8,8 @@ from fastapi import FastAPI, Form, HTTPException, UploadFile
 from fastapi.responses import JSONResponse
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.staticfiles import StaticFiles
+from pydantic import BaseModel, Field
+from coaching import assist
 
 from audio import MAX_BYTES, MAX_SECONDS
 from engine import MODEL_ID, Engine
@@ -99,6 +101,24 @@ def transcribe(audio: UploadFile, language: Annotated[Literal["auto", "en", "hi"
         raise HTTPException(413, "Upload must be under 10 MB.")
     status, result = engine.transcribe(data, language)
     return JSONResponse(result, status, headers={"Retry-After": "5"} if status == 429 else None)
+
+
+class Assistance(BaseModel):
+    text: str = Field(min_length=1, max_length=12000)
+    action: Literal["coach", "clean", "message", "update", "notes", "translate"]
+    context: str = Field(default="", max_length=3000)
+    language: Literal["English", "Hindi"] = "English"
+    consent: Literal[True]
+
+
+@app.post("/api/assist")
+def assistance(body: Assistance):
+    try:
+        return assist(body.text, body.action, body.context, body.language)
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from None
+    except RuntimeError as exc:
+        raise HTTPException(503, str(exc)) from None
 
 
 app.mount("/", StaticFiles(directory=ROOT / "static", html=True), name="frontend")

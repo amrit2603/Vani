@@ -4,6 +4,8 @@
 
 ## Current frontend and hosted-runtime evidence
 
+- Practice extension: docs/practice-release.md records the approved scope, validation, secret handling, local-only storage and deferred experiments. Twenty-six Python tests and browser/Node checks pass. Real synthetic-text Gemini coaching returned 200; its key is in an ignored server .env, never browser configuration or release archives. The local five-minute interface sends bounded 30-second sections; direct ASR decoding limits are preserved. This is not a 100-user capacity or pronunciation certification.
+
 - GitHub publication, 18 November 2026: created the public repository https://github.com/amrit2603/Vani and pushed the current app on main. Initial application commit: c8ebfeef898490972103706c788188795fa17778, verified against the remote branch. Before publication, 21 tests, lint and JavaScript syntax checks passed. A limited known-pattern scan of 53 source/asset paths found no matching private keys or common token formats; this is not an exhaustive secret audit. Original references, user recordings, environments and credentials were excluded. Only the intentional cropped application animation is excepted from the MP4 ignore rule.
 
 - Landing and recording/editor pages follow the supplied video. Bilingual name and "Your voice, in words." replace unrelated reference copy. Record/upload, stop, edit, copy, cancellation, retry, playback and reduced-motion controls are implemented.

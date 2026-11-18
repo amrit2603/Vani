@@ -1,0 +1,15 @@
+{
+  "tests": [
+    "separate-practice-route",
+    "read-aloud-agreement",
+    "replace-undo",
+    "opt-in-local-history",
+    "five-minute-ten-bounded-chunks",
+    "editable-srt-export",
+    "recording-search",
+    "AI-consent-and-original-preservation",
+    "mobile-no-overflow"
+  ],
+  "errors": [],
+  "limits": "Synthetic PCM audio; ASR and Gemini network replies mocked."
+}

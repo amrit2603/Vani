@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';
+import {agreement, measurements, captions, wav} from '../static/speech-tools.mjs';
+assert.equal(agreement('Hello world','hello, WORLD!'),100);
+assert.equal(agreement('one two three','one three'),67);
+assert.equal(agreement('','hello'),null);
+assert.equal(agreement('hello','different word'),0);
+const samples=new Float32Array(48000);samples.fill(.1,0,16000);samples.fill(.1,32000);
+const result=measurements(samples,16000,'Hello um world');
+assert.equal(result.seconds,3);assert.equal(result.longest_quiet,1);assert.equal(result.wpm,60);
+assert.equal(result.possible_fillers,1);
+assert.match(captions([{start:1.25,end:2,text:'hello'}],'srt'),/00:00:01,250 --> 00:00:02,000/);
+assert.ok(captions([],'vtt').startsWith('WEBVTT'));
+assert.equal(wav(new Float32Array(16000)).size,32044);
+console.log('Speech metric, reference alignment, WAV and caption checks passed.');

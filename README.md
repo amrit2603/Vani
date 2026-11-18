@@ -4,6 +4,8 @@ Standalone local Hindi, English, and Hinglish dictation powered by Qwen3-ASR. MI
 
 **Your voice, in words.** The video-inspired landing page and recording workspace are implemented: record/upload, stop, transcribe, edit and copy. No visitor installation or model download. The project is independent of NILE's workflows.
 
+**Practice and productivity tools:** Read Aloud / Topic Speaking, 2/3/5-minute sessions, observable speaking metrics, retry comparison, chunk-timed playback/search, caption exports, batch audio, editing/personal terms, optional device-only history and consent-based Gemini coaching/rewriting. See [scope, setup and limitations](docs/practice-release.md). Speaker labels, pronunciation grading and live drafts are deferred. The appearance and animated landing are retained.
+
 Open <http://127.0.0.1:8787/> after starting the server. Browser-flow checks cover synthetic recording, cancellation, clipboard, retries and mobile layout; actual ASR checks are recorded separately. The intended public site is **vani.amritkumar.dev**, with a separate **shubhamsingh123/vani-speech** ZeroGPU service. These are deployment targets, not claimed live URLs. Follow [the verified free deployment plan](docs/free-deployment.md).
 
 ![Vani landing page](docs/screenshots/vani-landing.png)

@@ -25,7 +25,7 @@ def prepare(space):
     (web / "config.json").write_text(json.dumps({"space": space}, indent=2) + "\n", encoding="utf-8")
     for name in ("app.py", "requirements.txt", "README.md"):
         shutil.copy2(ROOT / "hosting" / name, backend / name)
-    for name in ("audio.py", "LICENSE"):
+    for name in ("audio.py", "coaching.py", "LICENSE"):
         shutil.copy2(ROOT / name, backend / name)
     assert json.loads((web / "config.json").read_text(encoding="utf-8"))["space"] == space
     assert (web / "index.html").is_file() and (backend / "audio.py").is_file()
