@@ -1,0 +1,30 @@
+name: Checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  api-and-audio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - name: Install test dependencies without the inference runtime
+        run: python -m pip install -r requirements-ci.txt
+      - name: API, audio, coaching and release tests
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Pure frontend logic tests
+        run: |
+          node tests/score.mjs
+          node tests/speech-tools.mjs
+          node tests/quota-message.mjs

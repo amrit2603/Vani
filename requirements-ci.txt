@@ -1,0 +1,7 @@
+# API/audio tests mock inference; no model download, GPU or Gemini key is needed.
+fastapi==0.162.5
+python-multipart==0.0.33
+httpx==0.28.1
+av==16.1.0
+numpy==2.5.4
+huggingface-hub==0.36.2

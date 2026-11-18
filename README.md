@@ -1,5 +1,7 @@
 # Vani — वाणी
 
+[![Checks](https://github.com/amrit2603/Vani/actions/workflows/ci.yml/badge.svg)](https://github.com/amrit2603/Vani/actions/workflows/ci.yml)
+
 **Your voice, in words.** An open-source Hindi, English and Hinglish dictation app with a separate speaking-practice workspace.
 
 **[Open the live app → vani.amritkumar.dev](https://vani.amritkumar.dev/)**
@@ -9,6 +11,17 @@
 The public demo needs no account, installation or model download. It uses shared Hugging Face ZeroGPU inference, so transcription and Practice can temporarily stop when usage/run limits are reached. A custom domain does not remove those limits. This is a working demo project, not an unlimited or always-available speech service.
 
 ![Vani landing page](docs/screenshots/vani-landing.png)
+
+[Engineering decisions & automated checks](docs/engineering.md)
+
+<details>
+<summary>Preview Workspace and Practice</summary>
+
+![Dictation workspace](docs/screenshots/vani-workspace.png)
+
+![Speaking practice](docs/screenshots/vani-practice.png)
+
+</details>
 
 ## What you can do
 
