@@ -23,6 +23,12 @@ The public demo needs no account, installation or model download. It uses shared
 
 </details>
 
+## Quick review
+
+- Try [Workspace](https://vani.amritkumar.dev/#dictate) and [Practice](https://vani.amritkumar.dev/#practice), or use the screenshots above if the shared speech service reaches its quota.
+- Read [the engineering notes](docs/engineering.md), then follow the local API in [app.py](app.py), bounded inference worker in [engine.py](engine.py) and explicit AI actions in [coaching.py](coaching.py).
+- Review [API/audio failure-path tests](tests/test_app.py) and [coaching consent tests](tests/test_coaching.py). Browser preview is provisional; the final ASR result is generated after Stop.
+
 ## What you can do
 
 | Area | Features |
