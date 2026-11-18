@@ -1,6 +1,7 @@
 {
   "tests": [
     "two-navigation-choices",
+    "centered-navigation",
     "no-advanced-controls",
     "explicit-prompt-generation",
     "independent-room-drafts",
@@ -8,7 +9,9 @@
     "explicit-AI-coaching",
     "navigation-discards-pending-AI",
     "existing-local-notes-preserved",
-    "review-transcript",
+    "automatic-transcript",
+    "audio-playback-and-download",
+    "audio-survives-room-navigation",
     "same-prompt-retry",
     "read-aloud-reference-match",
     "mobile-no-overflow"

@@ -47,6 +47,8 @@ const fs = require("node:fs");
       () => document.getElementById("new-prompt").onclick,
     );
     assert.equal(await p.locator("nav a").count(), 2);
+    const centered = await p.locator("nav").boundingBox();
+    assert.ok(Math.abs(centered.x + centered.width / 2 - 720) < 2);
     assert.equal(await p.locator(".studio-tools").count(), 0);
     assert.equal(await p.locator("#batch-start").count(), 0);
     assert.equal(await p.locator("#audio-file").count(), 0);
@@ -61,11 +63,14 @@ const fs = require("node:fs");
     assert.equal(await p.locator("#record").isDisabled(), true);
     assert.equal(await p.locator("#prompt").textContent(), "");
     assert.equal(await p.locator("#practice-result").isVisible(), false);
+    assert.equal(await p.locator("#new-prompt").textContent(), "New topic");
+    assert.match(await p.locator("#timer").textContent(), /02:00 left/);
     await p.screenshot({
       path: "docs/screenshots/vani-practice.png",
       fullPage: true,
     });
     await p.locator("#duration").selectOption("300");
+    assert.match(await p.locator("#timer").textContent(), /05:00 left/);
     assert.equal(await p.locator("#prompt").textContent(), "");
     await p.locator("#new-prompt").click();
     const prompt = await p.locator("#prompt").textContent();
@@ -82,7 +87,18 @@ const fs = require("node:fs");
       await p.getByRole("button", { name: "Start recording" }).waitFor();
     }
     await speak();
-    assert.equal(await p.locator(".transcript-panel").isVisible(), false);
+    assert.equal(await p.locator(".transcript-panel").isVisible(), true);
+    assert.equal(await p.locator("#playback").isVisible(), true);
+    await p.locator("#playback").evaluate(async (audio) => {
+      await audio.play();
+      audio.pause();
+    });
+    const downloadEvent = p.waitForEvent("download");
+    await p.locator("#download-audio").click();
+    const download = await downloadEvent;
+    assert.match(download.suggestedFilename(), /vani-practice-recording/);
+    await download.saveAs("tmp/qa/practice-download.webm");
+    assert.ok(fs.statSync("tmp/qa/practice-download.webm").size > 100);
     assert.match(
       await p.locator("#practice-report").textContent(),
       /at least 10 seconds/,
@@ -95,19 +111,15 @@ const fs = require("node:fs");
         .textContent.includes("concrete example"),
     );
     assert.equal(aiCalls, 1);
-    await p.locator("#review-transcript").click();
     assert.equal(await p.locator(".transcript-panel").isVisible(), true);
     assert.equal(await p.locator("#transcript").inputValue(), text);
     await p.locator("#try-again").click();
     assert.equal(await p.locator("#prompt").textContent(), prompt);
     assert.equal(await p.locator("#practice-result").isVisible(), false);
     assert.equal(await p.locator("#transcript").inputValue(), "");
-    assert.equal(
-      await p.locator("#review-transcript").textContent(),
-      "Review transcript",
-    );
     await speak();
     assert.match(await p.locator("#comparison").textContent(), /Last attempt/);
+    const practiceAudio = await p.locator("#playback").getAttribute("src");
     delayAI = true;
     await p.locator("#ai-run").click();
     await p.waitForFunction(() =>
@@ -120,10 +132,16 @@ const fs = require("node:fs");
     );
     assert.equal(await p.locator("#practice-result").isVisible(), false);
     await p.getByRole("link", { name: "Practice", exact: true }).click();
+    await p.locator("#playback").waitFor({ state: "visible" });
+    assert.equal(
+      await p.locator("#playback").getAttribute("src"),
+      practiceAudio,
+    );
     await p.waitForTimeout(500);
     assert.equal(await p.locator("#ai-output").textContent(), "");
     assert.equal(await p.locator("#ai-run").isEnabled(), true);
     await p.locator("#practice-mode").selectOption("read");
+    assert.equal(await p.locator("#new-prompt").textContent(), "New passage");
     assert.equal(await p.locator("#prompt").textContent(), "");
     assert.equal(await p.locator("#record").isDisabled(), true);
     await p.locator("#new-prompt").click();
@@ -159,6 +177,7 @@ const fs = require("node:fs");
         {
           tests: [
             "two-navigation-choices",
+            "centered-navigation",
             "no-advanced-controls",
             "explicit-prompt-generation",
             "independent-room-drafts",
@@ -166,7 +185,9 @@ const fs = require("node:fs");
             "explicit-AI-coaching",
             "navigation-discards-pending-AI",
             "existing-local-notes-preserved",
-            "review-transcript",
+            "automatic-transcript",
+            "audio-playback-and-download",
+            "audio-survives-room-navigation",
             "same-prompt-retry",
             "read-aloud-reference-match",
             "mobile-no-overflow",

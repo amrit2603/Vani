@@ -91,11 +91,12 @@ export async function decode(blob) {
   const context = new AudioContext();
   try {
     const audio = await context.decodeAudioData(await blob.arrayBuffer());
-    if (audio.duration > 300)
-      throw new Error("Choose at most five minutes of audio.");
+    // Allow one second of recorder scheduling jitter; keep decoded output capped at five minutes.
+    if (audio.duration > 301)
+      throw new Error("Record for at most five minutes.");
     const offline = new OfflineAudioContext(
       1,
-      Math.ceil(audio.duration * 16000),
+      Math.min(4800000, Math.ceil(audio.duration * 16000)),
       16000,
     );
     const source = offline.createBufferSource();

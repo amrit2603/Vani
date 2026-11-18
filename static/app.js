@@ -10,7 +10,7 @@ let capture = null;
 let generation = 0;
 let pending = null;
 let lastAudio = null;
-let playbackUrl = null;
+const recordings = { dictate: null, practice: null };
 let configuration;
 let remoteClient;
 let currentRoom = "dictate";
@@ -95,11 +95,36 @@ async function ensureService() {
 
 function rememberAudio(blob, filename) {
   lastAudio = { blob, filename, language: $("language").value };
-  if (playbackUrl) URL.revokeObjectURL(playbackUrl);
-  playbackUrl = URL.createObjectURL(blob);
-  $("playback").src = playbackUrl;
-  $("playback").hidden = false;
+  if (recordings[currentRoom]) URL.revokeObjectURL(recordings[currentRoom].url);
+  recordings[currentRoom] = { url: URL.createObjectURL(blob), filename };
+  showRecording();
 }
+
+function showRecording() {
+  const audio = recordings[currentRoom];
+  $("recording-review").hidden = !audio;
+  $("playback").hidden = !audio;
+  if (!audio) return;
+  if ($("playback").getAttribute("src") !== audio.url)
+    $("playback").src = audio.url;
+  $("download-audio").href = audio.url;
+  $("download-audio").download = `vani-${currentRoom}-${audio.filename}`;
+}
+
+function clock(seconds) {
+  return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+}
+function resetTimer() {
+  const practice = location.hash === "#practice";
+  $("timer").textContent = practice
+    ? `${clock(Number($("duration").value))} left`
+    : "00:00";
+  $("timer").setAttribute(
+    "aria-label",
+    practice ? "Time remaining" : "Recording duration",
+  );
+}
+$("duration").addEventListener("change", resetTimer);
 
 async function remoteTranscribe(settings, blob, filename, language, token) {
   const { Client, handle_file } =
@@ -141,7 +166,7 @@ async function transcribeAudio(blob, filename, language) {
   if (!blob.size)
     return say("This recording is empty. Try recording again.", "error");
   if (blob.size > MAX_BYTES)
-    return say("Choose audio under 10 MB and two minutes.", "error");
+    return say("Keep recordings under 10 MB and five minutes.", "error");
   const token = ++generation;
   setPhase("processing");
   $("retry").hidden = true;
@@ -168,7 +193,11 @@ async function transcribeAudio(blob, filename, language) {
   }, 1600000);
   try {
     const settings = await ensureService();
-    const samples = await decode(blob);
+    const decoded = await decode(blob);
+    const samples =
+      location.hash === "#practice"
+        ? decoded.subarray(0, Number($("duration").value) * 16000)
+        : decoded;
     const fullSeconds = samples.length / 16000;
     const from = 0,
       to = fullSeconds;
@@ -285,6 +314,7 @@ function releaseCapture(session) {
 async function startRecording() {
   const token = ++generation;
   setPhase("requesting");
+  $("playback").pause();
   say("Allow microphone access in your browser to begin.");
   let stream;
   try {
@@ -309,6 +339,9 @@ async function startRecording() {
       bytes: 0,
       canceled: false,
       started: performance.now(),
+      practice: location.hash === "#practice",
+      seconds:
+        location.hash === "#practice" ? Number($("duration").value) : 299,
       token,
     };
     capture = session;
@@ -357,19 +390,15 @@ async function startRecording() {
     recorder.start(1000);
     session.interval = setInterval(() => {
       const seconds = Math.floor((performance.now() - session.started) / 1000);
-      $("timer").textContent =
-        `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+      $("timer").textContent = session.practice
+        ? `${clock(Math.max(0, session.seconds - seconds))} left`
+        : clock(seconds);
     }, 250);
-    // Stop just short of the server limit to allow for recorder scheduling jitter.
-    session.deadline = setTimeout(
-      () => {
-        if (recorder.state === "recording") recorder.stop();
-      },
-      (location.hash === "#practice"
-        ? Number(document.getElementById("duration").value) - 1
-        : 299) * 1000,
-    );
-    $("timer").textContent = "00:00";
+    session.deadline = setTimeout(() => {
+      if (session.practice) $("timer").textContent = "00:00 left";
+      if (recorder.state === "recording") recorder.stop();
+    }, session.seconds * 1000);
+    resetTimer();
     setPhase("recording");
     say("Recording now. Speak naturally, then choose Stop & transcribe.");
   } catch (error) {
@@ -503,15 +532,17 @@ function route() {
     else link.removeAttribute("aria-current");
   }
   $("playback").pause();
-  $("playback").hidden = true;
+  showRecording();
   lastAudio = null;
   $("retry").hidden = true;
-  $("timer").textContent = "00:00";
+  resetTimer();
   $("result-meta").textContent = "";
   setPhase("idle");
   say(
     page === "practice"
-      ? "Choose New prompt, then start recording."
+      ? $("prompt").textContent.trim()
+        ? "Your topic is ready. Start recording when you are ready."
+        : "Choose New topic, then start recording."
       : "Ready when you are.",
   );
   document.dispatchEvent(new CustomEvent("vani:route", { detail: page }));

@@ -36,6 +36,16 @@ let busy = false,
 function practice() {
   return location.hash === "#practice";
 }
+function updateModeCopy() {
+  const reading = $("practice-mode").value === "read";
+  $("new-prompt").textContent = reading ? "New passage" : "New topic";
+  $("try-again").textContent = reading
+    ? "Read this again"
+    : "Try this topic again";
+  $("prompt-placeholder").textContent = reading
+    ? "Click New passage to get something to read aloud."
+    : "Click New topic to get something to talk about.";
+}
 function stopFeedback() {
   revision++;
   if (feedbackAbort) {
@@ -53,8 +63,6 @@ function resetResult() {
   $("ai-status").textContent = "";
   $("ai-run").disabled = false;
   document.body.classList.remove("show-transcript");
-  $("review-transcript").setAttribute("aria-expanded", "false");
-  $("review-transcript").textContent = "Review transcript";
 }
 function updateRecord() {
   if (!busy && practice())
@@ -67,6 +75,7 @@ function clearPrompt() {
   $("prompt-placeholder").hidden = false;
   previous = null;
   resetResult();
+  updateModeCopy();
   updateRecord();
 }
 function newPrompt() {
@@ -91,7 +100,7 @@ function newPrompt() {
   $("prompt-placeholder").hidden = true;
   updateRecord();
   $("status").textContent =
-    "Prompt ready. Press Start recording when you are ready.";
+    "Ready. Press Start recording and speak until the timer ends, or stop earlier.";
 }
 $("new-prompt").onclick = newPrompt;
 $("practice-mode").onchange = clearPrompt;
@@ -103,19 +112,11 @@ $("try-again").onclick = () => {
   $("transcript").value = "";
   $("transcript").dispatchEvent(new Event("input"));
   $("playback").pause();
-  $("playback").hidden = true;
-  $("timer").textContent = "00:00";
+  $("duration").dispatchEvent(new Event("change"));
   updateRecord();
   $("record").focus();
-  $("status").textContent = "Same prompt. Press Start recording to try again.";
-};
-$("review-transcript").onclick = () => {
-  const open = document.body.classList.toggle("show-transcript");
-  $("review-transcript").setAttribute("aria-expanded", String(open));
-  $("review-transcript").textContent = open
-    ? "Hide transcript"
-    : "Review transcript";
-  if (open) $("transcript").focus();
+  $("status").textContent =
+    "Same topic or passage. Start recording to try again.";
 };
 document.addEventListener("vani:phase", (event) => {
   busy = event.detail !== "idle";
@@ -126,9 +127,11 @@ document.addEventListener("vani:phase", (event) => {
 });
 document.addEventListener("vani:route", (event) => {
   stopFeedback();
-  $("review-transcript").setAttribute("aria-expanded", "false");
-  $("review-transcript").textContent = "Review transcript";
   $("practice-result").hidden = event.detail !== "practice" || !attempt;
+  document.body.classList.toggle(
+    "show-transcript",
+    event.detail === "practice" && Boolean(attempt),
+  );
   updateRecord();
 });
 document.addEventListener("vani:result", (event) => {
@@ -158,6 +161,7 @@ document.addEventListener("vani:result", (event) => {
   $("ai-status").textContent = "";
   $("ai-run").disabled = false;
   $("practice-result").hidden = false;
+  document.body.classList.add("show-transcript");
   setTimeout(() => {
     if (practice())
       $("practice-result").scrollIntoView({
@@ -241,4 +245,5 @@ $("ai-run").onclick = async () => {
     if (id === revision) feedbackAbort = null;
   }
 };
+updateModeCopy();
 updateRecord();

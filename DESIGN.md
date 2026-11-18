@@ -11,4 +11,4 @@ Authority: the user's 1440 × 662, 12.28-second preview video, sampled at one-se
 - At 390 px the landing copy precedes the artwork and the workspace stacks controls above the editor. Focus, disabled, processing, recording, error, empty and transcript states are implemented.
 - Reduced-motion preference pauses the video; the pause/play control remains available.
 
-- Simplified rooms: Workspace presents recording beside one editable transcript; Practice presents mode, duration, New prompt, recording and concise feedback. Transcript review and AI coaching are secondary actions after an attempt. No personalization or productivity dashboard.
+- Simplified rooms: centered Workspace / Practice tabs lead the task path. Workspace presents recording beside one editable transcript; Practice presents mode, duration, New topic / New passage, countdown, recording, visible transcript and concise feedback. Playback and Save recording sit together below recording controls; AI coaching is secondary. No personalization or productivity dashboard.

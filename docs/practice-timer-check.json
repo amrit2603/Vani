@@ -1,0 +1,11 @@
+{
+  "seconds": [
+    120,
+    180,
+    300
+  ],
+  "auto_stop": true,
+  "transcript_and_playback": true,
+  "recorder_tail_capped_at_300_seconds": true,
+  "limits": "Requested deadline values verified; browser test accelerates each stop timer to one second. Synthetic microphone and mocked ASR; not real five-minute hardware recordings."
+}

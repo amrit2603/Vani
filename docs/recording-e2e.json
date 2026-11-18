@@ -1,0 +1,9 @@
+{
+  "date": "2026-11-18T07:26:06.486Z",
+  "backend": "real local Qwen3-ASR",
+  "flow": "record synthetic speech through browser microphone, stop, transcribe, visible transcript, audio playback, room switching, clipboard",
+  "inference_wait_seconds": 8,
+  "text": "Hello. This is a short voice note. Hello. This is a short voice note. Hello.",
+  "errors": [],
+  "limits": "Synthetic English WAV fed into browser microphone; no physical microphone, natural Hindi/Hinglish accuracy, full-length session or Gemini request."
+}

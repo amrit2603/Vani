@@ -158,15 +158,49 @@
   line-height: 1.8;
   max-width: 70ch;
 }
+.site-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+.site-header nav a {
+  padding: 12px 16px;
+  min-height: 44px;
+}
 .site-header nav a[aria-current="page"] {
-  text-decoration: underline;
-  text-underline-offset: 7px;
+  background: var(--ink);
+  color: var(--paper);
 }
 .site-header nav a[href="#practice"] {
   display: inline !important;
 }
 .site-header nav {
+  font-size: 14px;
+  gap: 8px;
+  border-bottom: 1px solid var(--rule);
+}
+.recording-review {
+  margin-top: 24px;
+}
+.recording-review > p:first-child {
+  font-size: 13px;
+}
+.recording-review audio {
+  display: block;
+  margin-bottom: 16px;
+}
+.recording-review .text-link {
+  font-size: 13px;
+  text-decoration: underline;
+}
+.recording-note {
+  color: var(--muted);
   font-size: 12px;
+  line-height: 1.7;
+  max-width: 45ch;
+}
+.is-practice #timer {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
 }
 .info-page {
   min-height: 60vh;
@@ -220,8 +254,8 @@
   .practice-result p {
     font-size: 13px;
   }
-  .site-header nav {
-    gap: 22px;
+  .site-header .workspace-brand {
+    display: none;
   }
   .is-practice .workspace-grid {
     margin-top: 24px;

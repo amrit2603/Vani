@@ -115,7 +115,7 @@
           aria-labelledby="practice-title"
         >
           <h1 id="practice-title">A little practice.</h1>
-          <p>Choose a mode, get a prompt, and speak.</p>
+          <p>Pick a topic. Take your time. Find your voice.</p>
           <div class="practice-options">
             <label
               >Practice<select id="practice-mode">
@@ -128,11 +128,11 @@
                 <option value="180">3 minutes</option>
                 <option value="300">5 minutes</option>
               </select></label
-            ><button id="new-prompt" class="button primary">New prompt</button>
+            ><button id="new-prompt" class="button primary">New topic</button>
           </div>
           <div id="prompt-box" class="prompt-box">
             <p id="prompt-placeholder">
-              Your prompt will appear when you click New prompt.
+              Click New topic to get something to talk about.
             </p>
             <p id="prompt" hidden></p>
           </div>
@@ -161,12 +161,21 @@
               ><output id="timer" aria-label="Recording duration">00:00</output>
             </div>
             <p class="limits">Your words appear after you stop.</p>
-            <audio
-              id="playback"
-              controls
-              hidden
-              aria-label="Your recording"
-            ></audio>
+            <div id="recording-review" class="recording-review" hidden>
+              <p>Listen to your recording</p>
+              <audio
+                id="playback"
+                controls
+                hidden
+                aria-label="Your recording"
+              ></audio>
+              <a id="download-audio" class="text-link" download
+                >Save recording</a
+              >
+              <p class="recording-note">
+                Save a copy to listen after closing this page.
+              </p>
+            </div>
           </aside>
           <section class="transcript-panel" aria-label="Transcript editor">
             <div class="editor-header">
@@ -211,20 +220,16 @@
           <p id="comparison"></p>
           <div class="result-actions">
             <button id="try-again" class="button primary">
-              Try this prompt again</button
-            ><button
-              id="review-transcript"
-              class="button"
-              aria-expanded="false"
-            >
-              Review transcript
+              Try this topic again
             </button>
           </div>
           <div class="coaching">
             <button id="ai-run" class="text-link" aria-describedby="ai-note">
               Get AI coaching →
             </button>
-            <p id="ai-note">Sends this attempt’s text and prompt to Gemini.</p>
+            <p id="ai-note">
+              Sends this attempt’s text and topic or passage to Gemini.
+            </p>
             <p id="ai-status" role="status"></p>
             <div id="ai-output" class="ai-feedback"></div>
           </div>
